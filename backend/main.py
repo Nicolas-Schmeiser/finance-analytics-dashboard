@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from sqlmodel import Session, select
 
+from sqlmodel import Session, select
 from database.database import engine
 from database.models import Transaction, Category
 from database.schemas import TransactionWithCategory
@@ -17,6 +17,7 @@ def get_transactions():
                 Transaction,
                 Category.name
             )
+            .select_from(Transaction)
             .join(
                 Category,
                 Transaction.category_id == Category.id  # type: ignore (ignore type error from SQLModel's join syntax)
