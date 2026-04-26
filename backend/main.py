@@ -17,6 +17,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/") # Root route to confirm API is running when starting the server
+def root():
+    return {"message": "API is running"}
+
 @app.get("/transactions", response_model=list[TransactionWithCategory]) # response model defines the structure of the API response, included in docs
 def get_transactions():
 
