@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlmodel import Session, select
@@ -22,7 +22,7 @@ def root():
     return {"message": "API is running"}
 
 @app.get("/transactions", response_model=list[TransactionWithCategory]) # response model defines the structure of the API response, included in docs
-def get_transactions():
+def get_transactions(category: str | None = Query(default=None)):
 
     with Session(engine) as session:
 
@@ -34,9 +34,15 @@ def get_transactions():
             .select_from(Transaction)
             .join(
                 Category,
-                Transaction.category_id == Category.id  # type: ignore (ignore type error from SQLModel's join syntax)
+                Transaction.category_id == Category.id
             )
         )
+
+        # Apply filter only if category is provided
+        if category:
+            statement = statement.where(
+                Category.name == category
+            )
 
         results = session.exec(statement).all()
 
