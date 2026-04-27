@@ -40,12 +40,15 @@
         loadTransactions(selectedCategory, selectedMinAmount, selectedMaxAmount);
     }
 
-    function calculateTotalSpend() { // Uses already filtered transactions data
-        totalSpend =
-            transactions.reduce(
-                (sum, t) => sum + Number(t.amount),
-                0
-            );
+    function calculateTotalSpend() { // Aggregated total sum of spend
+
+        let sum = 0;
+
+        for (let t of transactions) {
+            sum += Number(t.amount);
+        }
+
+        totalSpend = sum;
     }
 
     onMount(() => {
