@@ -21,6 +21,18 @@ app.add_middleware(
 def root():
     return {"message": "API is running"}
 
+@app.get("/categories", response_model=list[str]) # Dynamic load of existing categories in filter
+def get_categories():
+
+    with Session(engine) as session:
+
+        statement = (select(Category.name))
+        results = session.exec(statement).all()
+        
+        return results
+
+
+
 @app.get("/transactions", response_model=list[TransactionWithCategory]) # response model defines the structure of the API response, included in docs
 def get_transactions(
     category: str | None = Query(default=None),

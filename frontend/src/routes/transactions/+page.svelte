@@ -4,9 +4,16 @@
 
     let transactions = $state([]);
     let loading = $state(true);
+    let categories = $state([]);
     let selectedCategory = $state(""); // Category filter
     let selectedMinAmount = $state(""); // Amount filter
     let selectedMaxAmount = $state(""); // Amount filter
+
+    async function loadCategories() { // Required for dynamic category filter
+
+        const response = await fetch("http://127.0.0.1:8000/categories");
+        categories = await response.json();
+    }
 
     async function loadTransactions(category = "", minAmount = "", maxAmount = "") {
 
@@ -21,8 +28,8 @@
         if (params.toString()) {url += `?${params.toString()}`;}
 
         const response = await fetch(url);
-
         transactions = await response.json();
+
         loading = false;
     }
 
@@ -30,16 +37,27 @@
         loadTransactions(selectedCategory, selectedMinAmount, selectedMaxAmount);
     }
 
-    onMount(loadTransactions);
+    onMount(
+        loadTransactions,
+        loadCategories
+    );
 
 </script>
 
 <h1>Transactions</h1>
 
 <select bind:value={selectedCategory}>
+
     <option value="">All</option>
-    <option value="Food">Food</option>
-    <option value="Transport">Transport</option>
+
+    {#each categories as category}
+
+        <option value={category}>
+            {category}
+        </option>
+
+    {/each}
+
 </select>
 
 <input
