@@ -37,10 +37,10 @@
         loadTransactions(selectedCategory, selectedMinAmount, selectedMaxAmount);
     }
 
-    onMount(
-        loadTransactions,
-        loadCategories
-    );
+    onMount(() => {
+        loadTransactions();
+        loadCategories();
+    });
 
 </script>
 
