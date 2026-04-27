@@ -8,6 +8,7 @@
     let selectedCategory = $state(""); // Category filter
     let selectedMinAmount = $state(""); // Amount filter
     let selectedMaxAmount = $state(""); // Amount filter
+    let totalSpend = $state(0);
 
     async function loadCategories() { // Required for dynamic category filter
 
@@ -30,11 +31,21 @@
         const response = await fetch(url);
         transactions = await response.json();
 
+        calculateTotalSpend();
+
         loading = false;
     }
 
     function filterTransactions() {
         loadTransactions(selectedCategory, selectedMinAmount, selectedMaxAmount);
+    }
+
+    function calculateTotalSpend() { // Uses already filtered transactions data
+        totalSpend =
+            transactions.reduce(
+                (sum, t) => sum + Number(t.amount),
+                0
+            );
     }
 
     onMount(() => {
@@ -73,6 +84,11 @@
 />
 
 <button onclick={filterTransactions}>Filter</button>
+
+<h3>
+    Total Spend:
+    {totalSpend.toFixed(2)} €
+</h3>
 
 <table border="1">
     <thead>
