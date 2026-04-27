@@ -16,8 +16,8 @@
         // Enables multiple params separated by '&' in URL for filtering
         const params = new URLSearchParams();
         if (category) {params.append("category",category);}
-        if (minAmount !== "") {params.append("min_amount",minAmount);}
-        if (maxAmount !== "") {params.append("max_amount",maxAmount);}
+        if (minAmount !== "" && minAmount !== null) {params.append("min_amount",minAmount);}
+        if (maxAmount !== "" && maxAmount !== null) {params.append("max_amount",maxAmount);}
         if (params.toString()) {url += `?${params.toString()}`;}
 
         const response = await fetch(url);
