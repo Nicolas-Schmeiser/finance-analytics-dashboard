@@ -22,7 +22,11 @@ def root():
     return {"message": "API is running"}
 
 @app.get("/transactions", response_model=list[TransactionWithCategory]) # response model defines the structure of the API response, included in docs
-def get_transactions(category: str | None = Query(default=None)):
+def get_transactions(
+    category: str | None = Query(default=None),
+    min_amount: float | None = Query(default=None),
+    max_amount: float | None = Query(default=None),
+    ):
 
     with Session(engine) as session:
 
@@ -34,15 +38,25 @@ def get_transactions(category: str | None = Query(default=None)):
             .select_from(Transaction)
             .join(
                 Category,
-                Transaction.category_id == Category.id
+                Transaction.category_id == Category.id # type: ignore
             )
         )
 
-        # Apply filter only if category is provided
+        # Apply filter only if parameter is provided
         if category:
             statement = statement.where(
                 Category.name == category
             )
+
+        if min_amount is not None: # To ensure 0 would not be considered as FALSE
+            statement = statement.where(
+                Transaction.amount >= min_amount
+            )
+
+        if max_amount is not None: # To ensure 0 would not be considered as FALSE
+            statement = statement.where(
+                Transaction.amount <= max_amount
+        )
 
         results = session.exec(statement).all()
 

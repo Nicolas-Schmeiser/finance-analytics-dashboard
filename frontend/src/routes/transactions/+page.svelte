@@ -5,21 +5,29 @@
     let transactions = $state([]);
     let loading = $state(true);
     let selectedCategory = $state(""); // Category filter
+    let selectedMinAmount = $state(""); // Amount filter
+    let selectedMaxAmount = $state(""); // Amount filter
 
-    async function loadTransactions(category = "") {
+    async function loadTransactions(category = "", minAmount = "", maxAmount = "") {
 
         loading = true;
         let url = "http://127.0.0.1:8000/transactions";
 
-        if (category) {url += `?category=${category}`;}
+        // Enables multiple params separated by '&' in URL for filtering
+        const params = new URLSearchParams();
+        if (category) {params.append("category",category);}
+        if (minAmount !== "") {params.append("min_amount",minAmount);}
+        if (maxAmount !== "") {params.append("max_amount",maxAmount);}
+        if (params.toString()) {url += `?${params.toString()}`;}
 
         const response = await fetch(url);
+
         transactions = await response.json();
         loading = false;
     }
 
     function filterTransactions() {
-        loadTransactions(selectedCategory);
+        loadTransactions(selectedCategory, selectedMinAmount, selectedMaxAmount);
     }
 
     onMount(loadTransactions);
@@ -30,13 +38,23 @@
 
 <select bind:value={selectedCategory}>
     <option value="">All</option>
-    <option value="Groceries">Food</option>
+    <option value="Food">Food</option>
     <option value="Transport">Transport</option>
 </select>
 
-<button onclick={filterTransactions}>
-    Filter
-</button>
+<input
+    type="number"
+    placeholder="Min Amount"
+    bind:value={selectedMinAmount}
+/>
+
+<input
+    type="number"
+    placeholder="Max Amount"
+    bind:value={selectedMaxAmount}
+/>
+
+<button onclick={filterTransactions}>Filter</button>
 
 <table border="1">
     <thead>
