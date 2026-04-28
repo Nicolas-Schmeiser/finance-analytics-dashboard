@@ -28,12 +28,12 @@ def root():
 
 
 # Dynamic load of existing categories in filter
-@app.get("/categories", response_model=list[str]) 
+@app.get("/categories", response_model=list[Category]) 
 def get_categories():
 
     with Session(engine) as session:
 
-        statement = (select(Category.name))
+        statement = (select(Category))
         results = session.exec(statement).all()
 
         return results
