@@ -63,6 +63,16 @@
             selectedEndDate);
     }
 
+    // Reset filters when button pressed
+    function clearFilter(){
+        selectedCategory = "";
+        selectedMinAmount = "";
+        selectedMaxAmount = "";
+        selectedStartDate = "";
+        selectedEndDate = "";
+        loadTransactions();
+    }
+
     // Calculate aggregated TotalSpend
     function calculateTotalSpend() {
         let sum = 0;
@@ -121,6 +131,7 @@
 />
 
 <button onclick={filterTransactions}>Filter</button>
+<button onclick={clearFilter}>Clear</button>
 
 <h3>
     Total Spend:
