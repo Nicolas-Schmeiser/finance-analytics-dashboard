@@ -9,6 +9,8 @@
     let loading = $state(true);
     let categories = $state([]);
     let totalSpend = $state(0);
+    let editingTransactionId = $state(null);
+    let editingCategoryId = $state(null);
     
     // Filters
     let selectedCategory = $state("");
@@ -83,8 +85,13 @@
     }
 
     // Edit selected transaction's category
-    function handleEdit(transactionId) {
-        console.log("Edit clicked for transaction:", transactionId);
+    async function handleEdit() {
+        await fetch(
+            `http://127.0.0.1:8000/transactions/${editingTransactionId}/category?category_id=${editingCategoryId}`,
+            { method: "PUT" }
+        );
+        editingTransactionId = null;
+        loadTransactions();
     }
 
     // Define which function to run at page loading
@@ -117,8 +124,8 @@
 <select bind:value={selectedCategory}>
     <option value="">All</option>
     {#each categories as category}
-        <option value={category}>
-            {category}
+        <option value={category.id}>
+            {category.name}
         </option>
     {/each}
 </select>
@@ -170,14 +177,39 @@
                     <td>{transaction.description}</td>
                     <td>{transaction.amount}</td>
                     <td>{transaction.date}</td>
-                    <td>{transaction.category}</td>
+                    <td>
+                        <!-- Edit mode activated -->
+                        {#if editingTransactionId === transaction.id}
+                            <select 
+                                class="form-select form-select-sm"
+                                bind:value={editingCategoryId}
+                                >
+                                {#each categories as category}
+                                    <option value={category.id}>
+                                        {category.name}
+                                    </option>
+                                {/each}
+                            </select>
+                        <!-- Edit mode not active -->
+                        {:else}
+                            {transaction.category}
+                        {/if}
+                    </td>
                     <td> 
-                        <button class="btn btn-sm btn-primary"
-                        // function wrapper needed due to parameter
-                        // else the transaction.id would directly compute for each row during rendering
-                        // and the function would become inactive (as already executed)
-                        onclick={() => handleEdit(transaction.id)} 
-                        >Edit</button> 
+                        <!-- Logic to display edit or save button depending on selection -->
+                        {#if editingTransactionId === transaction.id}
+                            <button class="btn btn-sm btn-primary"
+                            // function wrapper needed due to parameter
+                            // else the transaction.id would directly compute for each row during rendering
+                            // and the function would become inactive (as already executed)
+                            onclick={handleEdit()}
+                            >Save</button> 
+                        {:else}
+                            <button class="btn btn-sm btn-primary"
+                            // Enter editing state
+                            onclick={editingTransactionId = transaction.id}
+                            >Edit</button> 
+                        {/if}
                     </td>
                 </tr>
             {/each}
