@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException
 
 from sqlmodel import Session, select
 from database.database import engine
@@ -13,19 +14,21 @@ app = FastAPI()
 # Add CORS middleware otherwise the frontend won't be able to access the API response due to CORS policy
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allow project defined frontend origin
+    allow_origins=["http://localhost:5173"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-@app.get("/") # Root route to confirm API is running when starting the server
+# Root route to confirm API is running when starting the server
+@app.get("/") 
 def root():
     return {"message": "API is running"}
 
 
-@app.get("/categories", response_model=list[str]) # Dynamic load of existing categories in filter
+# Dynamic load of existing categories in filter
+@app.get("/categories", response_model=list[str]) 
 def get_categories():
 
     with Session(engine) as session:
@@ -36,17 +39,21 @@ def get_categories():
         return results
 
 
-@app.get("/transactions", response_model=list[TransactionWithCategory]) # response model defines the structure of the API response, included in docs
+# Main endpoint to get filtered transaction data
+# response model defines the structure of the API response, included in docs
+@app.get("/transactions", response_model=list[TransactionWithCategory]) 
 def get_transactions(
+    # Filters
     category: str | None = Query(default=None),
     min_amount: float | None = Query(default=None),
     max_amount: float | None = Query(default=None),
     start_date: date | None = Query(default=None),
     end_date: date | None = Query(default=None),
-    ):
+):
 
     with Session(engine) as session:
 
+        # Get all transactions
         statement = (
             select(
                 Transaction,
@@ -70,7 +77,7 @@ def get_transactions(
                 Transaction.amount >= min_amount
             )
 
-        if max_amount is not None: # To ensure 0 would not be considered as FALSE
+        if max_amount is not None:
             statement = statement.where(
                 Transaction.amount <= max_amount
         )
@@ -89,8 +96,8 @@ def get_transactions(
 
         transactions = []
 
+        # Return transactions using reponse model
         for transaction, category_name in results:
-
             transactions.append(
                 TransactionWithCategory(
                     id=transaction.id, # type: ignore
@@ -102,3 +109,31 @@ def get_transactions(
             )
 
         return transactions
+    
+
+# Edit category from an existing transaction
+@app.put("/transactions/{transaction_id}/category")
+def update_transaction_category(
+    transaction_id: int,
+    category_id: int
+):
+    with Session(engine) as session:
+
+        # Select relevant transaction record
+        transaction = session.get(Transaction, transaction_id)
+
+        if not transaction:
+            raise HTTPException(
+                status_code=404,
+                detail="Transaction not found"
+            )
+
+        # Change category to new value
+        transaction.category_id = category_id
+
+        # Update database
+        session.add(transaction)
+        session.commit()
+        session.refresh(transaction)
+
+        return transaction
