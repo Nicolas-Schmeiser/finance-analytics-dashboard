@@ -84,14 +84,24 @@
         totalSpend = sum;
     }
 
-    // Edit selected transaction's category
-    async function handleEdit() {
-        await fetch(
+    // Manage the category edit button
+    async function handleEdit(transactionId) {
+
+        if (transactionId === editingTransactionId) {
+            await fetch(
             `http://127.0.0.1:8000/transactions/${editingTransactionId}/category?category_id=${editingCategoryId}`,
             { method: "PUT" }
-        );
-        editingTransactionId = null;
-        loadTransactions();
+            );
+            editingTransactionId = null;
+            editingCategoryId = null;
+            loadTransactions();
+        }
+
+        else {
+            // enter edit mode
+            editingTransactionId = transactionId
+            // editingCategoryId = categoryId -> first add category_id in transaction table
+        }
     }
 
     // Define which function to run at page loading
@@ -179,7 +189,7 @@
                     <td>{transaction.date}</td>
                     <td>
                         <!-- Edit mode activated -->
-                        {#if editingTransactionId === transaction.id}
+                        {#if transaction.id === editingTransactionId}
                             <select 
                                 class="form-select form-select-sm"
                                 bind:value={editingCategoryId}
@@ -197,17 +207,13 @@
                     </td>
                     <td> 
                         <!-- Logic to display edit or save button depending on selection -->
-                        {#if editingTransactionId === transaction.id}
+                        {#if transaction.id === editingTransactionId}
                             <button class="btn btn-sm btn-primary"
-                            // function wrapper needed due to parameter
-                            // else the transaction.id would directly compute for each row during rendering
-                            // and the function would become inactive (as already executed)
-                            onclick={handleEdit()}
+                            onclick={handleEdit(transaction.id)}
                             >Save</button> 
                         {:else}
                             <button class="btn btn-sm btn-primary"
-                            // Enter editing state
-                            onclick={editingTransactionId = transaction.id}
+                            onclick={() => handleEdit(transaction.id)}
                             >Edit</button> 
                         {/if}
                     </td>
