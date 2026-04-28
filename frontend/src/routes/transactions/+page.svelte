@@ -188,7 +188,7 @@
                     <td>{transaction.amount}</td>
                     <td>{transaction.date}</td>
                     <td>
-                        <!-- Edit mode activated -->
+                        <!-- Edit mode active -->
                         {#if transaction.id === editingTransactionId}
                             <select 
                                 class="form-select form-select-sm"
@@ -206,16 +206,11 @@
                         {/if}
                     </td>
                     <td> 
-                        <!-- Logic to display edit or save button depending on selection -->
-                        {#if transaction.id === editingTransactionId}
-                            <button class="btn btn-sm btn-primary"
-                            onclick={handleEdit(transaction.id)}
-                            >Save</button> 
-                        {:else}
-                            <button class="btn btn-sm btn-primary"
-                            onclick={() => handleEdit(transaction.id)}
-                            >Edit</button> 
-                        {/if}
+                        <button class="btn btn-sm btn-primary"
+                        onclick={() => handleEdit(transaction.id)}
+                        // Display different label based on edit mode state
+                        >{transaction.id === editingTransactionId ? "Save" : "Edit"} 
+                        </button>
                     </td>
                 </tr>
             {/each}
