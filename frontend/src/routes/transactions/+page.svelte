@@ -82,6 +82,11 @@
         totalSpend = sum;
     }
 
+    // Edit selected transaction's category
+    function handleEdit(transactionId) {
+        console.log("Edit clicked for transaction:", transactionId);
+    }
+
     // Define which function to run at page loading
     onMount(() => {
         loadTransactions();
@@ -166,6 +171,14 @@
                     <td>{transaction.amount}</td>
                     <td>{transaction.date}</td>
                     <td>{transaction.category}</td>
+                    <td> 
+                        <button class="btn btn-sm btn-primary"
+                        // function wrapper needed due to parameter
+                        // else the transaction.id would directly compute for each row during rendering
+                        // and the function would become inactive (as already executed)
+                        onclick={() => handleEdit(transaction.id)} 
+                        >Edit</button> 
+                    </td>
                 </tr>
             {/each}
         {/if}
