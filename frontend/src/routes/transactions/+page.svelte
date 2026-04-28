@@ -1,22 +1,37 @@
+<!-- /////////////////////// Logic /////////////////////// -->
+
 <script>
 
     import { onMount } from "svelte";
 
+    // General Variables
     let transactions = $state([]);
     let loading = $state(true);
     let categories = $state([]);
-    let selectedCategory = $state(""); // Category filter
-    let selectedMinAmount = $state(""); // Amount filter
-    let selectedMaxAmount = $state(""); // Amount filter
     let totalSpend = $state(0);
-
-    async function loadCategories() { // Required for dynamic category filter
+    
+    // Filters
+    let selectedCategory = $state("");
+    let selectedMinAmount = $state("");
+    let selectedMaxAmount = $state("");
+    let selectedStartDate = $state("");
+    let selectedEndDate = $state("");
+    
+    // Dynamic category filter
+    async function loadCategories() { 
 
         const response = await fetch("http://127.0.0.1:8000/categories");
         categories = await response.json();
     }
 
-    async function loadTransactions(category = "", minAmount = "", maxAmount = "") {
+    // Loading filtered data for transaction table & aggregated field
+    async function loadTransactions(
+        category = "", 
+        minAmount = "", 
+        maxAmount = "",
+        startDate = "",
+        endDate = ""
+    ) {
 
         loading = true;
         let url = "http://127.0.0.1:8000/transactions";
@@ -26,6 +41,8 @@
         if (category) {params.append("category",category);}
         if (minAmount !== "" && minAmount !== null) {params.append("min_amount",minAmount);}
         if (maxAmount !== "" && maxAmount !== null) {params.append("max_amount",maxAmount);}
+        if (startDate !== "" && startDate !== null) {params.append("start_date",startDate);}
+        if (endDate !== "" && endDate !== null) {params.append("end_date",endDate);}
         if (params.toString()) {url += `?${params.toString()}`;}
 
         const response = await fetch(url);
@@ -36,21 +53,26 @@
         loading = false;
     }
 
+    // Apply filters when button pressed
     function filterTransactions() {
-        loadTransactions(selectedCategory, selectedMinAmount, selectedMaxAmount);
+        loadTransactions(
+            selectedCategory, 
+            selectedMinAmount, 
+            selectedMaxAmount, 
+            selectedStartDate, 
+            selectedEndDate);
     }
 
-    function calculateTotalSpend() { // Aggregated total sum of spend
-
+    // Calculate aggregated TotalSpend
+    function calculateTotalSpend() {
         let sum = 0;
-
         for (let t of transactions) {
             sum += Number(t.amount);
         }
-
         totalSpend = sum;
     }
 
+    // Define which function to run at page loading
     onMount(() => {
         loadTransactions();
         loadCategories();
@@ -58,28 +80,40 @@
 
 </script>
 
+
+<!-- /////////////////////// Components /////////////////////// -->
+
+
 <h1>Transactions</h1>
 
+<label>From:</label>
+<input
+    type="date"
+    bind:value={selectedStartDate}
+/>
+
+<label>To:</label>
+<input
+    type="date"
+    bind:value={selectedEndDate}
+/>
+
+<label>Category:</label>
 <select bind:value={selectedCategory}>
-
     <option value="">All</option>
-
     {#each categories as category}
-
         <option value={category}>
             {category}
         </option>
-
     {/each}
-
 </select>
 
+<label>Amount:</label>
 <input
     type="number"
     placeholder="Min Amount"
     bind:value={selectedMinAmount}
 />
-
 <input
     type="number"
     placeholder="Max Amount"
@@ -126,3 +160,7 @@
         {/if}
     </tbody>
 </table>
+
+
+<!-- /////////////////////// UI /////////////////////// -->
+

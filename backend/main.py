@@ -5,6 +5,8 @@ from sqlmodel import Session, select
 from database.database import engine
 from database.models import Transaction, Category
 from database.schemas import TransactionWithCategory
+
+from datetime import date
     
 app = FastAPI()
 
@@ -17,9 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/") # Root route to confirm API is running when starting the server
 def root():
     return {"message": "API is running"}
+
 
 @app.get("/categories", response_model=list[str]) # Dynamic load of existing categories in filter
 def get_categories():
@@ -28,9 +32,8 @@ def get_categories():
 
         statement = (select(Category.name))
         results = session.exec(statement).all()
-        
-        return results
 
+        return results
 
 
 @app.get("/transactions", response_model=list[TransactionWithCategory]) # response model defines the structure of the API response, included in docs
@@ -38,6 +41,8 @@ def get_transactions(
     category: str | None = Query(default=None),
     min_amount: float | None = Query(default=None),
     max_amount: float | None = Query(default=None),
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
     ):
 
     with Session(engine) as session:
@@ -69,6 +74,16 @@ def get_transactions(
             statement = statement.where(
                 Transaction.amount <= max_amount
         )
+            
+        if start_date is not None:
+            statement = statement.where(
+                Transaction.date >= start_date
+            )
+
+        if end_date is not None:
+            statement = statement.where(
+                Transaction.date <= end_date
+            )
 
         results = session.exec(statement).all()
 
