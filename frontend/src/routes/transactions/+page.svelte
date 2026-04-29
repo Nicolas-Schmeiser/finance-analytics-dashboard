@@ -155,6 +155,18 @@
 
     }
 
+    // Sorting direction
+    function getSortArrow(column) {
+
+        if (sortColumn !== column) {
+            return "";
+        }
+
+        return sortDirection === "asc"
+            ? " ↓"
+            : " ↑";
+    }
+
     // Define which function to run at page loading
     onMount(() => {
         loadTransactions();
@@ -274,31 +286,31 @@
                     onclick={() => handleSort("id")}
                     style="cursor: pointer;"
                 >
-                    ID
+                    ID {getSortArrow("id")}
                 </th>
                 <th 
                     onclick={() => handleSort("description")}
                     style="cursor: pointer;"
                 >
-                    Description
+                    Description {getSortArrow("description")}
                 </th>
                 <th 
                     onclick={() => handleSort("amount")}
                     style="cursor: pointer;"
                 >
-                    Amount
+                    Amount {getSortArrow("amount")}
                 </th>
                 <th 
                     onclick={() => handleSort("date")}
                     style="cursor: pointer;"
                 >
-                    Date
+                    Date {getSortArrow("date")}
                 </th>
                 <th 
                     onclick={() => handleSort("category")}
                     style="cursor: pointer;"
                 >
-                    Category
+                    Category {getSortArrow("category")}
                 </th>
             </tr>
         </thead>
