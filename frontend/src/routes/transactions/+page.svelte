@@ -127,64 +127,80 @@
     Filters
   </h5>
 
-  <label class="form-label">From:</label>
-    <input
+  <div class="row g-3">
+
+    <div class="col-12 col-md">
+      <label class="form-label">From:</label>
+      <input
         type="date"
-        class="form-control mb-3"
+        class="form-control"
         bind:value={selectedStartDate}
-    />
+      />
+    </div>
 
-    <label class="form-label">To:</label>
-    <input
+    <div class="col-12 col-md">
+      <label class="form-label">To:</label>
+      <input
         type="date"
-        class="form-control mb-3"
+        class="form-control"
         bind:value={selectedEndDate}
-    />
+      />
+    </div>
 
-    <label class="form-label">Category:</label>
-    <select 
+    <div class="col-12 col-md">
+      <label class="form-label">Category:</label>
+      <select
         bind:value={selectedCategory}
-        class="form-control mb-3">
+        class="form-select"
+      >
         <option value="">All</option>
         {#each categories as category}
-            <option value={category.id}>
-                {category.name}
-            </option>
+          <option value={category.id}>
+            {category.name}
+          </option>
         {/each}
-    </select>
+      </select>
+    </div>
 
-    <label class="form-label">Min Amount:</label>
-    <input
+    <div class="col-12 col-md">
+      <label class="form-label">Min Amount:</label>
+      <input
         type="number"
-        class="form-control mb-3"
+        class="form-control"
         bind:value={selectedMinAmount}
-    />
+      />
+    </div>
 
-    <label class="form-label">Max Amount:</label>
-    <input
+    <div class="col-12 col-md">
+      <label class="form-label">Max Amount:</label>
+      <input
         type="number"
-        class="form-control mb-3"
+        class="form-control"
         bind:value={selectedMaxAmount}
-    />
-</div>
+      />
+    </div>
 
-<!--Filter buttons-->
-<div>
-    <button 
-        class="btn btn-primary me-2" 
+    <div class="col-12 col-md-auto d-flex align-items-end">
+      <button
+        class="btn btn-primary me-2"
         onclick={filterTransactions}
-    >
+      >
         Apply Filter
-    </button>
-    <button 
-        class="btn btn-secondary" 
+      </button>
+
+      <button
+        class="btn btn-secondary"
         onclick={clearFilter}
-    >
+      >
         Clear
-    </button>
+      </button>
+    </div>
+
+  </div>
+
 </div>
 
-
+<!--Total Spend Card-->
 <div class="alert alert-info mt-3">
     <strong>Total Spend:</strong>
     {totalSpend.toFixed(2)} €
@@ -194,62 +210,64 @@
 <hr class="my-4">
 
 <!--Transaction Table-->
-<table class="table table-striped table-hover mt-3">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Category</th>
-        </tr>
-    </thead>
+<div class="table-responsive">
+    <table class="table table-striped table-hover mt-3">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Category</th>
+            </tr>
+        </thead>
 
-    <tbody>
-        {#if loading}
-            <tr>
-                <td colspan="5">Loading data...</td>
-            </tr>
-        {:else if transactions.length === 0}
-            <tr>
-                <td colspan="5">No transactions found</td>
-            </tr>
-        {:else}
-            {#each transactions as transaction}
+        <tbody>
+            {#if loading}
                 <tr>
-                    <td>{transaction.id}</td>
-                    <td>{transaction.description}</td>
-                    <td>{transaction.amount}</td>
-                    <td>{transaction.date}</td>
-                    <td>
-                        <!-- Edit mode active -->
-                        {#if transaction.id === editingTransactionId}
-                            <select 
-                                class="form-select form-select-sm"
-                                bind:value={editingCategoryId}
-                                >
-                                {#each categories as category}
-                                    <option value={category.id}>
-                                        {category.name}
-                                    </option>
-                                {/each}
-                            </select>
-                        <!-- Edit mode not active -->
-                        {:else}
-                            {transaction.category}
-                        {/if}
-                    </td>
-                    <td> 
-                        <button class="btn btn-sm btn-secondary"
-                        onclick={() => handleEdit(transaction.id)}
-                        // Display different label based on edit mode state
-                        >{transaction.id === editingTransactionId ? "Save" : "Edit"} 
-                        </button>
-                    </td>
+                    <td colspan="5">Loading data...</td>
                 </tr>
-            {/each}
-        {/if}
-    </tbody>
-</table>
+            {:else if transactions.length === 0}
+                <tr>
+                    <td colspan="5">No transactions found</td>
+                </tr>
+            {:else}
+                {#each transactions as transaction}
+                    <tr>
+                        <td>{transaction.id}</td>
+                        <td>{transaction.description}</td>
+                        <td>{transaction.amount}</td>
+                        <td>{transaction.date}</td>
+                        <td>
+                            <!-- Edit mode active -->
+                            {#if transaction.id === editingTransactionId}
+                                <select 
+                                    class="form-select form-select-sm"
+                                    bind:value={editingCategoryId}
+                                    >
+                                    {#each categories as category}
+                                        <option value={category.id}>
+                                            {category.name}
+                                        </option>
+                                    {/each}
+                                </select>
+                            <!-- Edit mode not active -->
+                            {:else}
+                                {transaction.category}
+                            {/if}
+                        </td>
+                        <td> 
+                            <button class="btn btn-sm btn-secondary"
+                            onclick={() => handleEdit(transaction.id)}
+                            // Display different label based on edit mode state
+                            >{transaction.id === editingTransactionId ? "Save" : "Edit"} 
+                            </button>
+                        </td>
+                    </tr>
+                {/each}
+            {/if}
+        </tbody>
+    </table>
+</div>
 
 </div>
