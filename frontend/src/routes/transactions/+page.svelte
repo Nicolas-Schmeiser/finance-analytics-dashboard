@@ -120,90 +120,95 @@
 
 <h1 class="mb-4">Transactions</h1>
 
-<!--Filters-->
-<div class="mb-4">
+<div class="row mb-4">
 
-  <h5 class="mb-3">
-    Filters
-  </h5>
+  <!-- LEFT: Filters -->
+  <div class="col-12 col-md-9">
 
-  <div class="row g-3">
+    <!--Filters-->
+    <div class="mb-4">
+        <h5 class="mb-3">
+            Filters
+        </h5>
 
-    <div class="col-12 col-md">
-      <label class="form-label">From:</label>
-      <input
-        type="date"
-        class="form-control"
-        bind:value={selectedStartDate}
-      />
+        <div class="row g-3">
+            <div class="col-12 col-md">
+                <label class="form-label">From:</label>
+                <input
+                    type="date"
+                    class="form-control"
+                    bind:value={selectedStartDate}
+                />
+            </div>
+            <div class="col-12 col-md">
+                <label class="form-label">To:</label>
+                <input
+                    type="date"
+                    class="form-control"
+                    bind:value={selectedEndDate}
+                />
+            </div>
+            <div class="col-12 col-md">
+                <label class="form-label">Category:</label>
+                <select
+                    bind:value={selectedCategory}
+                    class="form-select"
+                >
+                    <option value="">All</option>
+                    {#each categories as category}
+                    <option value={category.id}>
+                        {category.name}
+                    </option>
+                    {/each}
+                </select>
+            </div>
+            <div class="col-12 col-md">
+                <label class="form-label">Min Amount:</label>
+                <input
+                    type="number"
+                    class="form-control"
+                    bind:value={selectedMinAmount}
+                />
+            </div>
+            <div class="col-12 col-md">
+                <label class="form-label">Max Amount:</label>
+                <input
+                    type="number"
+                    class="form-control"
+                    bind:value={selectedMaxAmount}
+                />
+            </div>
+            <div class="col-12 col-md-auto d-flex align-items-end">
+                <button
+                    class="btn btn-primary me-2"
+                    onclick={filterTransactions}
+                >
+                    Apply Filter
+                </button>
+                <button
+                    class="btn btn-secondary"
+                    onclick={clearFilter}
+                >
+                    Clear
+                </button>
+            </div>
+        </div>
     </div>
-
-    <div class="col-12 col-md">
-      <label class="form-label">To:</label>
-      <input
-        type="date"
-        class="form-control"
-        bind:value={selectedEndDate}
-      />
-    </div>
-
-    <div class="col-12 col-md">
-      <label class="form-label">Category:</label>
-      <select
-        bind:value={selectedCategory}
-        class="form-select"
-      >
-        <option value="">All</option>
-        {#each categories as category}
-          <option value={category.id}>
-            {category.name}
-          </option>
-        {/each}
-      </select>
-    </div>
-
-    <div class="col-12 col-md">
-      <label class="form-label">Min Amount:</label>
-      <input
-        type="number"
-        class="form-control"
-        bind:value={selectedMinAmount}
-      />
-    </div>
-
-    <div class="col-12 col-md">
-      <label class="form-label">Max Amount:</label>
-      <input
-        type="number"
-        class="form-control"
-        bind:value={selectedMaxAmount}
-      />
-    </div>
-
-    <div class="col-12 col-md-auto d-flex align-items-end">
-      <button
-        class="btn btn-primary me-2"
-        onclick={filterTransactions}
-      >
-        Apply Filter
-      </button>
-
-      <button
-        class="btn btn-secondary"
-        onclick={clearFilter}
-      >
-        Clear
-      </button>
-    </div>
-
   </div>
 
-</div>
-
-<!--Total Spend Card-->
-<div class="alert alert-info mt-3">
-    <strong>Total Spend:</strong>
-    {totalSpend.toFixed(2)} €
+  <!-- RIGHT: Total Spend card -->
+  <div class="col-12 col-md-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="card-title text-muted">
+          Total Spend
+        </h6>
+        <h3 class="fw-bold">
+          {totalSpend.toFixed(2)} €
+        </h3>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!--Separation line-->
