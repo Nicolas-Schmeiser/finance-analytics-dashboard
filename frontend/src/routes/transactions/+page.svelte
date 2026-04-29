@@ -1,4 +1,4 @@
-<!-- /////////////////////// Logic /////////////////////// -->
+<!-- /////////////////////// Logic (JavaScript) /////////////////////// -->
 
 <script>
 
@@ -113,54 +113,88 @@
 </script>
 
 
-<!-- /////////////////////// Components /////////////////////// -->
+<!-- /////////////////////// Components (Svelte & Bootstrap) /////////////////////// -->
+
+<!--General Container-->
+<div class="container mt-4">
+
+<h1 class="mb-4">Transactions</h1>
+
+<!--Filters-->
+<div class="mb-4">
+
+  <h5 class="mb-3">
+    Filters
+  </h5>
+
+  <label class="form-label">From:</label>
+    <input
+        type="date"
+        class="form-control mb-3"
+        bind:value={selectedStartDate}
+    />
+
+    <label class="form-label">To:</label>
+    <input
+        type="date"
+        class="form-control mb-3"
+        bind:value={selectedEndDate}
+    />
+
+    <label class="form-label">Category:</label>
+    <select 
+        bind:value={selectedCategory}
+        class="form-control mb-3">
+        <option value="">All</option>
+        {#each categories as category}
+            <option value={category.id}>
+                {category.name}
+            </option>
+        {/each}
+    </select>
+
+    <label class="form-label">Min Amount:</label>
+    <input
+        type="number"
+        class="form-control mb-3"
+        bind:value={selectedMinAmount}
+    />
+
+    <label class="form-label">Max Amount:</label>
+    <input
+        type="number"
+        class="form-control mb-3"
+        bind:value={selectedMaxAmount}
+    />
+</div>
+
+<!--Filter buttons-->
+<div>
+    <button 
+        class="btn btn-primary me-2" 
+        onclick={filterTransactions}
+    >
+        Apply Filter
+    </button>
+    <button 
+        class="btn btn-secondary" 
+        onclick={clearFilter}
+    >
+        Clear
+    </button>
+</div>
 
 
-<h1>Transactions</h1>
-
-<label>From:</label>
-<input
-    type="date"
-    bind:value={selectedStartDate}
-/>
-
-<label>To:</label>
-<input
-    type="date"
-    bind:value={selectedEndDate}
-/>
-
-<label>Category:</label>
-<select bind:value={selectedCategory}>
-    <option value="">All</option>
-    {#each categories as category}
-        <option value={category.id}>
-            {category.name}
-        </option>
-    {/each}
-</select>
-
-<label>Amount:</label>
-<input
-    type="number"
-    placeholder="Min Amount"
-    bind:value={selectedMinAmount}
-/>
-<input
-    type="number"
-    placeholder="Max Amount"
-    bind:value={selectedMaxAmount}
-/>
-
-<button onclick={filterTransactions}>Filter</button>
-<button onclick={clearFilter}>Clear</button>
-
-<h3>
-    Total Spend:
+<div class="alert alert-info mt-3">
+    <strong>Total Spend:</strong>
     {totalSpend.toFixed(2)} €
-</h3>
+</div>
 
-<table border="1">
+<!--Separation line-->
+<hr class="my-4">
+
+<!--Transaction Table-->
+<table class="table table-striped table-hover mt-3">
     <thead>
         <tr>
             <th>ID</th>
@@ -206,7 +240,7 @@
                         {/if}
                     </td>
                     <td> 
-                        <button class="btn btn-sm btn-primary"
+                        <button class="btn btn-sm btn-secondary"
                         onclick={() => handleEdit(transaction.id)}
                         // Display different label based on edit mode state
                         >{transaction.id === editingTransactionId ? "Save" : "Edit"} 
@@ -218,6 +252,4 @@
     </tbody>
 </table>
 
-
-<!-- /////////////////////// UI /////////////////////// -->
-
+</div>
