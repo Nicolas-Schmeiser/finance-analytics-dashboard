@@ -9,6 +9,8 @@
     let loading = $state(true);
     let categories = $state([]);
     let totalSpend = $state(0);
+
+    // Editing Category
     let editingTransactionId = $state(null);
     let editingCategoryId = $state(null);
     
@@ -18,6 +20,10 @@
     let selectedMaxAmount = $state("");
     let selectedStartDate = $state("");
     let selectedEndDate = $state("");
+
+    // Sorting
+    let sortColumn = $state(null);
+    let sortDirection = $state("asc");
     
     // Dynamic category filter
     async function loadCategories() { 
@@ -102,6 +108,51 @@
             editingTransactionId = transactionId
             // editingCategoryId = categoryId -> first add category_id in transaction table
         }
+    }
+
+    // Sort Columns
+    function handleSort(column) {
+
+        // Toggle direction if same column
+        if (sortColumn === column) {
+            sortDirection = sortDirection === "asc" ? "desc" : "asc";
+        }
+
+        // New column → reset direction
+        else {
+            sortColumn = column;
+            sortDirection = "asc";
+        }
+
+        // Perform sorting
+        transactions = [...transactions].sort((a, b) => {
+
+            let valueA = a[column];
+            let valueB = b[column];
+
+            // Handle numbers
+            if (!isNaN(valueA) && !isNaN(valueB)) {
+                return sortDirection === "asc"
+                    ? valueA - valueB
+                    : valueB - valueA;
+            }
+
+            // Handle dates
+            if (column === "date") {
+                let dateA = new Date(valueA);
+                let dateB = new Date(valueB);
+
+                return sortDirection === "asc"
+                    ? dateA - dateB
+                    : dateB - dateA;
+            }
+
+            // Handle text
+            return sortDirection === "asc"
+                ? String(valueA).localeCompare(String(valueB))
+                : String(valueB).localeCompare(String(valueA));
+        });
+
     }
 
     // Define which function to run at page loading
@@ -219,11 +270,36 @@
     <table class="table table-striped table-hover mt-3">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Category</th>
+                <th 
+                    onclick={() => handleSort("id")}
+                    style="cursor: pointer;"
+                >
+                    ID
+                </th>
+                <th 
+                    onclick={() => handleSort("description")}
+                    style="cursor: pointer;"
+                >
+                    Description
+                </th>
+                <th 
+                    onclick={() => handleSort("amount")}
+                    style="cursor: pointer;"
+                >
+                    Amount
+                </th>
+                <th 
+                    onclick={() => handleSort("date")}
+                    style="cursor: pointer;"
+                >
+                    Date
+                </th>
+                <th 
+                    onclick={() => handleSort("category")}
+                    style="cursor: pointer;"
+                >
+                    Category
+                </th>
             </tr>
         </thead>
 
