@@ -159,7 +159,7 @@ def seed_data():
                 category_id=8
             ),
             Transaction(
-                description="Tennis equipment",
+                description="ETF",
                 amount=1000,
                 date=date(2026, 1, 12),
                 category_id=10
@@ -173,8 +173,8 @@ def seed_data():
                 category_id=1
             ),
             Transaction(
-                description="Apartment rent",
-                amount=75,
+                description="Car Accident Repair",
+                amount=300,
                 date=date(2026, 2, 3),
                 category_id=9
             ),
