@@ -181,8 +181,6 @@
 <!--General Container-->
 <div class="container mt-4">
 
-    <h1 class="mb-4">Transactions</h1>
-
     <div class="row mb-4">
 
     <!-- LEFT: Filters -->
