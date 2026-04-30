@@ -163,8 +163,8 @@
         }
 
         return sortDirection === "asc"
-            ? " ↓"
-            : " ↑";
+            ? " ↑"
+            : " ↓";
     }
 
     // Define which function to run at page loading
