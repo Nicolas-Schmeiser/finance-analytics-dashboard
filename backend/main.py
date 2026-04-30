@@ -4,8 +4,9 @@ from fastapi import HTTPException
 
 from sqlmodel import Session, select
 from database.database import engine
-from database.models import Transaction, Category
-from database.schemas import TransactionWithCategory
+from database.models import Transaction, Category, Budget
+from database.schemas import TransactionWithCategory, CategorySummary
+from sqlalchemy import func
 
 from datetime import date
     
@@ -39,8 +40,7 @@ def get_categories():
         return results
 
 
-# Main endpoint to get filtered transaction data
-# response model defines the structure of the API response, included in docs
+# Filtered transaction data
 @app.get("/transactions", response_model=list[TransactionWithCategory]) 
 def get_transactions(
     # Filters
@@ -137,3 +137,75 @@ def update_transaction_category(
         session.refresh(transaction)
 
         return transaction
+    
+
+# Filtered aggregated monthly sum of transaction amount and budget per category
+@app.get("/category_summary", response_model=list[CategorySummary]) 
+def get_category_summary(
+    # Filters
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+):
+
+    with Session(engine) as session:
+
+        year_month = func.strftime(
+            "%Y-%m",
+            Transaction.date
+        )
+
+        statement = (
+            select(
+                year_month.label("year_month"),
+                Category.name.label("category"), # type: ignore
+                func.sum(Transaction.amount).label("spent"),
+                func.coalesce(Budget.amount,0).label("budget")
+            )
+            .select_from(Transaction)
+            .join(
+                Category,
+                Transaction.category_id == Category.id # type: ignore
+            )
+            # Join budget on monthly level
+            .outerjoin(
+                Budget,
+                (Budget.category_id == Category.id) # type: ignore
+                & (func.strftime("%Y-%m",Budget.date) == year_month)
+            )
+            .group_by(
+                year_month,
+                Category.name
+            )
+            .order_by(
+                year_month,
+                Category.name
+            )
+        )
+
+        # Apply filter only if parameter is provided
+        if start_date is not None:
+            statement = statement.where(
+                Transaction.date >= start_date
+            )
+
+        if end_date is not None:
+            statement = statement.where(
+                Transaction.date <= end_date
+            )
+
+        results = session.exec(statement).all()
+
+        transactions = []
+
+        # Return transactions using reponse model
+        for year_month, category, spent, budget in results:
+            transactions.append(
+                CategorySummary(
+                    year_month = year_month,
+                    category = category,
+                    spent = spent,
+                    budget = budget
+                )
+            )
+
+        return transactions
