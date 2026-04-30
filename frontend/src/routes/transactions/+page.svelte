@@ -85,7 +85,7 @@
     function calculateTotalSpend() {
         let sum = 0;
         for (let t of transactions) {
-            sum += Number(t.amount);
+            sum += t.amount;
         }
         totalSpend = sum;
     }
@@ -265,7 +265,7 @@
             Total Spend
             </h6>
             <h3 class="fw-bold">
-            {totalSpend.toFixed(2)} €
+            {totalSpend} €
             </h3>
         </div>
         </div>
