@@ -6,6 +6,7 @@
 
     // General Variables
     let loading = $state(true);
+    let categorySummary = $state([])
     let totalSpend = $state(0);
     let remainingBudget = $state(0);
 
@@ -13,9 +14,26 @@
     let selectedStartDate = $state("");
     let selectedEndDate = $state("");
 
-    // Loading filtered data for the summarized category vs budget bar visual
-    async function loadCategorySummary() {
-        //tbd
+    // Loading filtered data for the summarized monthly category vs budget bar visual
+    async function loadMonthlyCategorySummary(
+        startDate = "",
+        endDate = ""
+    ) {
+        loading = true;
+        let url = "http://127.0.0.1:8000/monthly_category_summary";
+
+        // Enables multiple params separated by '&' in URL for filtering
+        const params = new URLSearchParams();
+        if (startDate !== "" && startDate !== null) {params.append("start_date",startDate);}
+        if (endDate !== "" && endDate !== null) {params.append("end_date",endDate);}
+        if (params.toString()) {url += `?${params.toString()}`;}
+
+        const response = await fetch(url);
+        categorySummary = await response.json();
+
+        calculateTotalSpend();
+
+        loading = false;
     }
 
     // Loading filtered data for the summarized monthly Time-Serie visual
@@ -23,9 +41,18 @@
         //tbd
     }
 
+    // Calculate aggregated TotalSpend
+    function calculateTotalSpend() {
+        let sum = 0;
+        for (let c of categorySummary) {
+            sum += Number(c.spent);
+        }
+        totalSpend = sum;
+    }
+
     // Define which function to run at page loading
     onMount(() => {
-        loadCategorySummary();
+        loadMonthlyCategorySummary();
         loadMonthlySummary();
     });
 
