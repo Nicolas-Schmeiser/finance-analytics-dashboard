@@ -24,9 +24,14 @@ class TransactionWithCategory(SQLModel):
     category: str
 
 
-class CategorySummary(SQLModel):
+class MonthlyCategorySummary(SQLModel):
 
     year_month: str
     category: str
     spent: Decimal
     budget: Decimal
+
+class MonthlyTotalSpend(SQLModel):
+
+    year_month: str
+    spent: Decimal

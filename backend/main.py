@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from sqlmodel import Session, select
 from database.database import engine
 from database.models import Transaction, Category, Budget
-from database.schemas import TransactionWithCategory, CategorySummary
+from database.schemas import TransactionWithCategory, MonthlyCategorySummary, MonthlyTotalSpend
 from sqlalchemy import func
 
 from datetime import date
@@ -140,7 +140,7 @@ def update_transaction_category(
     
 
 # Filtered aggregated monthly sum of transaction amount and budget per category
-@app.get("/monthly_category_summary", response_model=list[CategorySummary]) 
+@app.get("/monthly_category_summary", response_model=list[MonthlyCategorySummary]) 
 def get_monthly_category_summary(
     # Filters
     start_date: date | None = Query(default=None),
@@ -195,12 +195,12 @@ def get_monthly_category_summary(
 
         results = session.exec(statement).all()
 
-        transactions = []
+        output = []
 
         # Return transactions using reponse model
         for year_month, category, spent, budget in results:
-            transactions.append(
-                CategorySummary(
+            output.append(
+                MonthlyCategorySummary(
                     year_month = year_month,
                     category = category,
                     spent = spent,
@@ -208,4 +208,56 @@ def get_monthly_category_summary(
                 )
             )
 
-        return transactions
+        return output
+    
+
+    # Filtered aggregated monthly sum of transaction amount and budget per category
+@app.get("/monthly_total_spend", response_model=list[MonthlyTotalSpend]) 
+def get_monthly_category_summary(
+    # Filters
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+):
+
+    with Session(engine) as session:
+
+        year_month = func.strftime(
+            "%Y-%m",
+            Transaction.date
+        )
+
+        statement = (
+            select(
+                year_month.label("year_month"),
+                func.sum(Transaction.amount).label("spent"),
+            )
+            .select_from(Transaction)
+            .group_by(year_month)
+            .order_by(year_month)
+        )
+
+        # Apply filter only if parameter is provided
+        if start_date is not None:
+            statement = statement.where(
+                Transaction.date >= start_date
+            )
+
+        if end_date is not None:
+            statement = statement.where(
+                Transaction.date <= end_date
+            )
+
+        results = session.exec(statement).all()
+
+        output = []
+
+        # Return transactions using reponse model
+        for year_month, spent in results:
+            output.append(
+                MonthlyTotalSpend(
+                    year_month = year_month,
+                    spent = spent
+                )
+            )
+
+        return output
