@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from sqlmodel import Session, select
 from database.database import engine
 from database.models import Transaction, Category, Budget
-from database.schemas import TransactionWithCategory, MonthlyCategorySummary, MonthlyTotalSpend
+from database.schemas import TransactionWithCategory, CategorySpendWithBudget, MonthlyTotalSpend
 from sqlalchemy import func
 
 from datetime import date
@@ -45,8 +45,8 @@ def get_categories():
 def get_transactions(
     # Filters
     category: str | None = Query(default=None),
-    min_amount: float | None = Query(default=None),
-    max_amount: float | None = Query(default=None),
+    min_amount: int | None = Query(default=None),
+    max_amount: int | None = Query(default=None),
     start_date: date | None = Query(default=None),
     end_date: date | None = Query(default=None),
 ):
@@ -140,8 +140,8 @@ def update_transaction_category(
     
 
 # Filtered aggregated monthly sum of transaction amount and budget per category
-@app.get("/monthly_category_summary", response_model=list[MonthlyCategorySummary]) 
-def get_monthly_category_summary(
+@app.get("/category_spend_with_budget", response_model=list[CategorySpendWithBudget]) 
+def get_category_spend_with_budget(
     # Filters
     start_date: date | None = Query(default=None),
     end_date: date | None = Query(default=None),
@@ -149,48 +149,38 @@ def get_monthly_category_summary(
 
     with Session(engine) as session:
 
-        year_month = func.strftime(
-            "%Y-%m",
-            Transaction.date
-        )
-
         statement = (
             select(
-                year_month.label("year_month"),
                 Category.name.label("category"), # type: ignore
-                func.sum(Transaction.amount).label("spent"),
-                func.coalesce(Budget.amount,0).label("budget")
+                func.coalesce(func.sum(Transaction.amount),0).label("spent"),
+                func.coalesce(func.sum(Budget.amount),0).label("budget")
             )
-            .select_from(Transaction)
-            .join(
-                Category,
+            .select_from(Category)
+            .outerjoin(
+                Transaction,
                 Transaction.category_id == Category.id # type: ignore
             )
             # Join budget on monthly level
             .outerjoin(
                 Budget,
                 (Budget.category_id == Category.id) # type: ignore
-                & (func.strftime("%Y-%m",Budget.date) == year_month)
+                & (func.strftime("%Y-%m", Budget.date) == func.strftime("%Y-%m", Transaction.date))
             )
-            .group_by(
-                year_month,
-                Category.name
-            )
-            .order_by(
-                year_month,
-                Category.name
-            )
+            .group_by(Category.name)
+            .order_by(Category.name)
         )
 
         # Apply filter only if parameter is provided
         if start_date is not None:
             statement = statement.where(
-                Transaction.date >= start_date
+                (Transaction.date >= start_date)
+                & (Budget.date >= start_date)
             )
 
         if end_date is not None:
             statement = statement.where(
-                Transaction.date <= end_date
+                (Transaction.date <= end_date)
+                & (Budget.date <= end_date)
             )
 
         results = session.exec(statement).all()
@@ -198,10 +188,9 @@ def get_monthly_category_summary(
         output = []
 
         # Return transactions using reponse model
-        for year_month, category, spent, budget in results:
+        for category, spent, budget in results:
             output.append(
-                MonthlyCategorySummary(
-                    year_month = year_month,
+                CategorySpendWithBudget(
                     category = category,
                     spent = spent,
                     budget = budget
@@ -229,7 +218,7 @@ def get_monthly_total_spend(
         statement = (
             select(
                 year_month.label("year_month"),
-                func.sum(Transaction.amount).label("spent"),
+                func.coalesce(func.sum(Transaction.amount),0).label("spent"),
             )
             .select_from(Transaction)
             .group_by(year_month)

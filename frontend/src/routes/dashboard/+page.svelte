@@ -7,7 +7,7 @@
 
     // General Variables
     let loading = $state(true);
-    let monthlyCategorySummary = $state([])
+    let CategorySpendWithBudget = $state([])
     let monthlyTotalSpend = $state([])
     let totalSpend = $state(0);
     let remainingBudget = $state(0);
@@ -18,13 +18,13 @@
     let selectedStartDate = $state("");
     let selectedEndDate = $state("");
 
-    // Loading filtered data for the summarized monthly category vs budget bar visual
-    async function loadMonthlyCategorySummary(
+    // Loading filtered data for the summarized category spend vs budget bar visual
+    async function loadCategorySpendWithBudget(
         startDate = "",
         endDate = ""
     ) {
         loading = true;
-        let url = "http://127.0.0.1:8000/monthly_category_summary";
+        let url = "http://127.0.0.1:8000/category_spend_with_budget";
 
         // Enables multiple params separated by '&' in URL for filtering
         const params = new URLSearchParams();
@@ -33,7 +33,7 @@
         if (params.toString()) {url += `?${params.toString()}`;}
 
         const response = await fetch(url);
-        monthlyCategorySummary = await response.json();
+        CategorySpendWithBudget = await response.json();
 
         calculateTotalSpend();
         calculateRemainingBudget();
@@ -66,7 +66,7 @@
 
     // Apply filters when button pressed
     function applyFilters(){
-        loadMonthlyCategorySummary(
+        loadCategorySpendWithBudget(
             selectedStartDate,
             selectedEndDate
         );
@@ -80,15 +80,15 @@
     function clearFilter(){
         selectedStartDate = "";
         selectedEndDate = "";
-        loadMonthlyCategorySummary();
+        loadCategorySpendWithBudget();
         loadMonthlyTotalSpend();
     }
 
     // Calculate aggregated TotalSpend
     function calculateTotalSpend() {
         let sum = 0;
-        for (let c of monthlyCategorySummary) {
-            sum += Number(c.spent);
+        for (let c of CategorySpendWithBudget) {
+            sum += c.spent;
         }
         totalSpend = sum;
     }
@@ -97,18 +97,18 @@
     function calculateRemainingBudget() {
         let sumSpent = 0;
         let sumBudget = 0;
-        for (let c of monthlyCategorySummary){
-            sumSpent += Number(c.spent);
-            sumBudget += Number(c.budget);
+        for (let c of CategorySpendWithBudget){
+            sumSpent += c.spent;
+            sumBudget += c.budget;
         }
         remainingBudget = sumBudget - sumSpent;
     }
 
     // Monthly Category Visual
     function renderCategoryChart() {
-        const labels = monthlyCategorySummary.map(row => row.category)
-        const spent = monthlyCategorySummary.map(row => row.spent)
-        const budget = monthlyCategorySummary.map(row => row.budget)
+        const labels = CategorySpendWithBudget.map(row => row.category)
+        const spent = CategorySpendWithBudget.map(row => row.spent)
+        const budget = CategorySpendWithBudget.map(row => row.budget)
         const ctx = document.getElementById("categoryChart")
         if (categoryChart) {categoryChart.destroy();}
         categoryChart = new Chart(ctx, {
@@ -127,7 +127,7 @@
     function renderTotalSpendChart(){
         const ctx =document.getElementById("trendChart");
         const labels = monthlyTotalSpend.map(row => row.year_month);
-        const totals = monthlyTotalSpend.map(row => row.total_spent);
+        const totals = monthlyTotalSpend.map(row => row.spent);
         if (trendChart) {trendChart.destroy();}
         trendChart = new Chart(ctx, {
             type: "line",
@@ -142,7 +142,7 @@
 
     // Define which function to run at page loading
     onMount(() => {
-        loadMonthlyCategorySummary();
+        loadCategorySpendWithBudget();
         loadMonthlyTotalSpend();
     });
 
@@ -206,7 +206,7 @@
                     Total Spend
                     </h6>
                     <h3 class="fw-bold">
-                    {totalSpend.toFixed(2)} €
+                    {totalSpend} €
                     </h3>
                 </div>
             </div>
@@ -220,15 +220,13 @@
                     Remaining Budget
                     </h6>
                     <h3 class="fw-bold">
-                    {remainingBudget.toFixed(2)} €
+                    {remainingBudget} €
                     </h3>
                 </div>
             </div>
         </div>
     
     </div>
-
-
 
     <!--Separation line-->
     <hr class="my-4">
