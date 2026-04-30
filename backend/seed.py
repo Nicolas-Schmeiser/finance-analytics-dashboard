@@ -33,7 +33,8 @@ def seed_data():
             Category(name="Leisure"), #6
             Category(name="Dog"), #7
             Category(name="Tennis"), #8
-            Category(name="Misc") #9
+            Category(name="Misc"), #9
+            Category(name="Investment") #10
         ]
 
         session.add_all(categories)
@@ -157,6 +158,12 @@ def seed_data():
                 date=date(2026, 1, 12),
                 category_id=8
             ),
+            Transaction(
+                description="Tennis equipment",
+                amount=1000,
+                date=date(2026, 1, 12),
+                category_id=10
+            ),
 
             # ---------- FEBRUARY 2026 ----------
             Transaction(
@@ -164,6 +171,12 @@ def seed_data():
                 amount=930,
                 date=date(2026, 2, 3),
                 category_id=1
+            ),
+            Transaction(
+                description="Apartment rent",
+                amount=75,
+                date=date(2026, 2, 3),
+                category_id=9
             ),
             Transaction(
                 description="Dog insurance",
@@ -206,6 +219,7 @@ def seed_data():
             Budget(category_id=6, amount=220, date=date(2025, 10, 1)),
             Budget(category_id=7, amount=90, date=date(2025, 10, 1)),
             Budget(category_id=8, amount=80, date=date(2025, 10, 1)),
+            Budget(category_id=9, amount=50, date=date(2025, 10, 1)),
 
             # ---------- NOVEMBER 2025 ----------
             Budget(category_id=1, amount=950, date=date(2025, 11, 1)),
@@ -216,6 +230,7 @@ def seed_data():
             Budget(category_id=6, amount=220, date=date(2025, 11, 1)),
             Budget(category_id=7, amount=90, date=date(2025, 11, 1)),
             Budget(category_id=8, amount=80, date=date(2025, 11, 1)),
+            Budget(category_id=9, amount=50, date=date(2025, 11, 1)),
 
             # ---------- DECEMBER 2025 ----------
             Budget(category_id=1, amount=950, date=date(2025, 12, 1)),
@@ -226,6 +241,7 @@ def seed_data():
             Budget(category_id=6, amount=350, date=date(2025, 12, 1)),
             Budget(category_id=7, amount=100, date=date(2025, 12, 1)),
             Budget(category_id=8, amount=80, date=date(2025, 12, 1)),
+            Budget(category_id=9, amount=50, date=date(2025, 12, 1)),
 
             # ---------- JANUARY 2026 ----------
             Budget(category_id=1, amount=960, date=date(2026, 1, 1)),
@@ -236,6 +252,7 @@ def seed_data():
             Budget(category_id=6, amount=200, date=date(2026, 1, 1)),
             Budget(category_id=7, amount=90, date=date(2026, 1, 1)),
             Budget(category_id=8, amount=80, date=date(2026, 1, 1)),
+            Budget(category_id=9, amount=50, date=date(2026, 1, 1)),
 
             # ---------- FEBRUARY 2026 ----------
             Budget(category_id=1, amount=960, date=date(2026, 2, 1)),
@@ -246,6 +263,7 @@ def seed_data():
             Budget(category_id=6, amount=200, date=date(2026, 2, 1)),
             Budget(category_id=7, amount=90, date=date(2026, 2, 1)),
             Budget(category_id=8, amount=80, date=date(2026, 2, 1)),
+            Budget(category_id=9, amount=50, date=date(2026, 2, 1)),
 
             # ---------- MARCH 2026 ----------
             Budget(category_id=1, amount=960, date=date(2026, 3, 1)),
@@ -255,7 +273,9 @@ def seed_data():
             Budget(category_id=5, amount=90, date=date(2026, 3, 1)),
             Budget(category_id=6, amount=240, date=date(2026, 3, 1)),
             Budget(category_id=7, amount=90, date=date(2026, 3, 1)),
-            Budget(category_id=8, amount=80, date=date(2026, 3, 1))
+            Budget(category_id=8, amount=80, date=date(2026, 3, 1)),
+            Budget(category_id=9, amount=50, date=date(2026, 3, 1)),
+
         ]
 
         session.add_all(transactions)
