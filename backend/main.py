@@ -140,8 +140,8 @@ def update_transaction_category(
     
 
 # Filtered aggregated monthly sum of transaction amount and budget per category
-@app.get("/category_summary", response_model=list[CategorySummary]) 
-def get_category_summary(
+@app.get("/monthly_category_summary", response_model=list[CategorySummary]) 
+def get_monthly_category_summary(
     # Filters
     start_date: date | None = Query(default=None),
     end_date: date | None = Query(default=None),
