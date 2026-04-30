@@ -146,7 +146,7 @@
         </div>
     </div>
 
-    <!-- RIGHT: Total Spend card -->
+    <!-- RIGHT: Remaining Budget Card -->
         <div class="col-12 col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -162,4 +162,8 @@
 
     <!--Separation line-->
     <hr class="my-4">
+
+    <!--Visuals-->
+
+
 </div>
