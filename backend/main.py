@@ -213,7 +213,7 @@ def get_monthly_category_summary(
 
     # Filtered aggregated monthly sum of transaction amount and budget per category
 @app.get("/monthly_total_spend", response_model=list[MonthlyTotalSpend]) 
-def get_monthly_category_summary(
+def get_monthly_total_spend(
     # Filters
     start_date: date | None = Query(default=None),
     end_date: date | None = Query(default=None),

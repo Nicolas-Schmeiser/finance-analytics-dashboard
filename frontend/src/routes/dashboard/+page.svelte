@@ -6,7 +6,8 @@
 
     // General Variables
     let loading = $state(true);
-    let categorySummary = $state([])
+    let monthlyCategorySummary = $state([])
+    let monthlyTotalSpend = $state([])
     let totalSpend = $state(0);
     let remainingBudget = $state(0);
 
@@ -29,16 +30,32 @@
         if (params.toString()) {url += `?${params.toString()}`;}
 
         const response = await fetch(url);
-        categorySummary = await response.json();
+        monthlyCategorySummary = await response.json();
 
         calculateTotalSpend();
+        calculateRemainingBudget();
 
         loading = false;
     }
 
     // Loading filtered data for the summarized monthly Time-Serie visual
-    async function loadMonthlySummary() {
-        //tbd
+    async function loadMonthlyTotalSpend(
+        startDate = "",
+        endDate = ""
+    ) {
+        loading = true;
+        let url = "http://127.0.0.1:8000/monthly_total_spend";
+
+        // Enables multiple params separated by '&' in URL for filtering
+        const params = new URLSearchParams();
+        if (startDate !== "" && startDate !== null) {params.append("start_date",startDate);}
+        if (endDate !== "" && endDate !== null) {params.append("end_date",endDate);}
+        if (params.toString()) {url += `?${params.toString()}`;}
+
+        const response = await fetch(url);
+        monthlyTotalSpend = await response.json();
+
+        loading = false;
     }
 
     // Apply filters when button pressed
@@ -46,11 +63,11 @@
         loadMonthlyCategorySummary(
             selectedStartDate,
             selectedEndDate
-        )
-        loadMonthlySummary(
+        );
+        loadMonthlyTotalSpend(
             selectedStartDate,
             selectedEndDate 
-        )
+        );
     }
 
     // Reset filters when button pressed
@@ -58,22 +75,33 @@
         selectedStartDate = "";
         selectedEndDate = "";
         loadMonthlyCategorySummary();
-        loadMonthlySummary();
+        loadMonthlyTotalSpend();
     }
 
     // Calculate aggregated TotalSpend
     function calculateTotalSpend() {
         let sum = 0;
-        for (let c of categorySummary) {
+        for (let c of monthlyCategorySummary) {
             sum += Number(c.spent);
         }
         totalSpend = sum;
     }
 
+    // Calculate remaining budget
+    function calculateRemainingBudget() {
+        let sumSpent = 0;
+        let sumBudget = 0;
+        for (let c of monthlyCategorySummary){
+            sumSpent += Number(c.spent);
+            sumBudget += Number(c.budget);
+        }
+        remainingBudget = sumBudget - sumSpent;
+    }
+
     // Define which function to run at page loading
     onMount(() => {
         loadMonthlyCategorySummary();
-        loadMonthlySummary();
+        loadMonthlyTotalSpend();
     });
 
 </script>
