@@ -3,6 +3,7 @@
 <script>
 
     import { onMount } from "svelte";
+    import Chart from "chart.js/auto";
 
     // General Variables
     let loading = $state(true);
@@ -10,6 +11,8 @@
     let monthlyTotalSpend = $state([])
     let totalSpend = $state(0);
     let remainingBudget = $state(0);
+    let categoryChart;
+    let trendChart;
 
     // Filters
     let selectedStartDate = $state("");
@@ -34,6 +37,7 @@
 
         calculateTotalSpend();
         calculateRemainingBudget();
+        renderCategoryChart();
 
         loading = false;
     }
@@ -54,6 +58,8 @@
 
         const response = await fetch(url);
         monthlyTotalSpend = await response.json();
+
+        renderTotalSpendChart();
 
         loading = false;
     }
@@ -98,6 +104,42 @@
         remainingBudget = sumBudget - sumSpent;
     }
 
+    // Monthly Category Visual
+    function renderCategoryChart() {
+        const labels = monthlyCategorySummary.map(row => row.category)
+        const spent = monthlyCategorySummary.map(row => row.spent)
+        const budget = monthlyCategorySummary.map(row => row.budget)
+        const ctx = document.getElementById("categoryChart")
+        if (categoryChart) {categoryChart.destroy();}
+        categoryChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [
+                    {label: "Spent", data: spent},
+                    {label: "Budget",data: budget}
+                ]
+            }
+        })
+    }
+
+    // Monthly Total Spend Visual
+    function renderTotalSpendChart(){
+        const ctx =document.getElementById("trendChart");
+        const labels = monthlyTotalSpend.map(row => row.year_month);
+        const totals = monthlyTotalSpend.map(row => row.total_spent);
+        if (trendChart) {trendChart.destroy();}
+        trendChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {label: "Total Spend", data: totals, tension: 0.3}
+                ]
+            }
+        });
+    }
+
     // Define which function to run at page loading
     onMount(() => {
         loadMonthlyCategorySummary();
@@ -115,15 +157,12 @@
 
     <div class="row mb-4">
     
-        <!-- LEFT: Filters -->
-        <div class="col-12 col-md-9">
-
-            <!--Filters-->
+        <!--LEFT: Filters-->
+        <div class="col-12 col-md-6">
             <div class="mb-4">
                 <h5 class="mb-3">
                     Filters
                 </h5>
-
                 <div class="row g-3">
                     <div class="col-12 col-md">
                         <label class="form-label">From:</label>
@@ -159,7 +198,7 @@
             </div>
         </div>
 
-    <!-- RIGHT: Total Spend card -->
+    <!--RIGHT: Total Spend card-->
         <div class="col-12 col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -172,9 +211,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- RIGHT: Remaining Budget Card -->
+        
+        <!--Remaining Budget Card -->
         <div class="col-12 col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -187,11 +225,22 @@
                 </div>
             </div>
         </div>
+    
+    </div>
+
+
 
     <!--Separation line-->
     <hr class="my-4">
 
     <!--Visuals-->
-
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
 
 </div>
