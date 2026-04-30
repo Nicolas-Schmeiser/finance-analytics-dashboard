@@ -41,6 +41,26 @@
         //tbd
     }
 
+    // Apply filters when button pressed
+    function applyFilters(){
+        loadMonthlyCategorySummary(
+            selectedStartDate,
+            selectedEndDate
+        )
+        loadMonthlySummary(
+            selectedStartDate,
+            selectedEndDate 
+        )
+    }
+    
+    // Reset filters when button pressed
+    function clearFilter(){
+        selectedStartDate = "";
+        selectedEndDate = "";
+        loadMonthlyCategorySummary();
+        loadMonthlySummary();
+    }
+
     // Calculate aggregated TotalSpend
     function calculateTotalSpend() {
         let sum = 0;
@@ -98,7 +118,7 @@
                     <div class="col-12 col-md-auto d-flex align-items-end">
                         <button
                             class="btn btn-primary me-2"
-                            onclick={filterTransactions}
+                            onclick={applyFilters}
                         >
                             Apply Filter
                         </button>
