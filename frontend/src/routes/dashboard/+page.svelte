@@ -13,12 +13,12 @@
     let selectedStartDate = $state("");
     let selectedEndDate = $state("");
 
-    // Loading data for the summarized category vs budget bar visual
+    // Loading filtered data for the summarized category vs budget bar visual
     async function loadCategorySummary() {
         //tbd
     }
 
-    // Loading data for the summarized monthly Time-Serie visual
+    // Loading filtered data for the summarized monthly Time-Serie visual
     async function loadMonthlySummary() {
         //tbd
     }
