@@ -6,7 +6,6 @@ They are not database tables.
 """
 
 from datetime import date
-from decimal import Decimal
 from sqlmodel import SQLModel
 
 
@@ -19,19 +18,18 @@ class TransactionWithCategory(SQLModel):
 
     id: int
     description: str
-    amount: Decimal
+    amount: int
     date: date
     category: str
 
 
-class MonthlyCategorySummary(SQLModel):
+class CategorySpendWithBudget(SQLModel):
 
-    year_month: str
     category: str
-    spent: Decimal
-    budget: Decimal
+    spent: int
+    budget: int
 
 class MonthlyTotalSpend(SQLModel):
 
     year_month: str
-    spent: Decimal
+    spent: int
