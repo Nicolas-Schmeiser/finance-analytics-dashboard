@@ -2,13 +2,13 @@
 
 <script>
 
-    import { onMount } from "svelte";
+    let { data } = $props();
 
     // General Variables
-    let transactions = $state([]);
-    let loading = $state(true);
-    let categories = $state([]);
+    let transactions = $derived(data.transactions);
+    let categories = $derived(data.categories);
     let totalSpend = $state(0);
+    let loading = $state(false);
 
     // Editing Category
     let editingTransactionId = $state(null);
@@ -166,13 +166,6 @@
             ? " ↑"
             : " ↓";
     }
-
-    // Define which function to run at page loading
-    onMount(() => {
-        loadTransactions();
-        loadCategories();
-    });
-
 </script>
 
 
