@@ -144,24 +144,27 @@
 
             <div class="row g-3">
                 <div class="col-12 col-md">
-                    <label class="form-label">From:</label>
+                    <label for="start-date" class="form-label">From:</label>
                     <input
+                        id="start-date"
                         type="date"
                         class="form-control"
                         bind:value={selectedStartDate}
                     />
                 </div>
                 <div class="col-12 col-md">
-                    <label class="form-label">To:</label>
+                    <label for="end-date" class="form-label">To:</label>
                     <input
+                        id="end-date"
                         type="date"
                         class="form-control"
                         bind:value={selectedEndDate}
                     />
                 </div>
                 <div class="col-12 col-md">
-                    <label class="form-label">Category:</label>
+                    <label for="category-select" class="form-label">Category:</label>
                     <select
+                        id="category-select"
                         bind:value={selectedCategory}
                         class="form-select"
                     >
@@ -174,16 +177,18 @@
                     </select>
                 </div>
                 <div class="col-12 col-md">
-                    <label class="form-label">Min Amount:</label>
+                    <label for="min-amount" class="form-label">Min Amount:</label>
                     <input
+                        id="min-amount"
                         type="number"
                         class="form-control"
                         bind:value={selectedMinAmount}
                     />
                 </div>
                 <div class="col-12 col-md">
-                    <label class="form-label">Max Amount:</label>
+                    <label for="max-amount" class="form-label">Max Amount:</label>
                     <input
+                        id="max-amount"
                         type="number"
                         class="form-control"
                         bind:value={selectedMaxAmount}
