@@ -1,13 +1,16 @@
 <!-- /////////////////////// Logic (JavaScript) /////////////////////// -->
 
 <script>
+    import { goto } from "$app/navigation";
 
     let { data } = $props();
 
-    // General Variables
+    // Data
     let transactions = $derived(data.transactions);
     let categories = $derived(data.categories);
-    let totalSpend = $state(0);
+    let totalSpend = $derived(transactions.reduce((sum, t) => sum + t.amount, 0));
+    
+    // State
     let loading = $state(false);
 
     // Editing Category
@@ -24,89 +27,43 @@
     // Sorting
     let sortColumn = $state(null);
     let sortDirection = $state("asc");
-    
-    // Dynamic category filter
-    async function loadCategories() { 
-
-        const response = await fetch("http://127.0.0.1:8000/categories");
-        categories = await response.json();
-    }
-
-    // Loading filtered data for transaction table & aggregated field
-    async function loadTransactions(
-        category = "", 
-        minAmount = "", 
-        maxAmount = "",
-        startDate = "",
-        endDate = ""
-    ) {
-
-        loading = true;
-        let url = "http://127.0.0.1:8000/transactions";
-
-        // Enables multiple params separated by '&' in URL for filtering
-        const params = new URLSearchParams();
-        if (category) {params.append("category",category);}
-        if (minAmount !== "" && minAmount !== null) {params.append("min_amount",minAmount);}
-        if (maxAmount !== "" && maxAmount !== null) {params.append("max_amount",maxAmount);}
-        if (startDate !== "" && startDate !== null) {params.append("start_date",startDate);}
-        if (endDate !== "" && endDate !== null) {params.append("end_date",endDate);}
-        if (params.toString()) {url += `?${params.toString()}`;}
-
-        const response = await fetch(url);
-        transactions = await response.json();
-
-        calculateTotalSpend();
-
-        loading = false;
-    }
 
     // Apply filters when button pressed
     function filterTransactions() {
-        loadTransactions(
-            selectedCategory, 
-            selectedMinAmount, 
-            selectedMaxAmount, 
-            selectedStartDate, 
-            selectedEndDate);
+
+        const params = new URLSearchParams();
+
+        if (selectedCategory) params.append("category", selectedCategory);
+        if (selectedMinAmount) params.append("min_amount", selectedMinAmount);
+        if (selectedMaxAmount)params.append("max_amount", selectedMaxAmount);
+        if (selectedStartDate) params.append("start_date", selectedStartDate);
+        if (selectedEndDate) params.append("end_date", selectedEndDate);
+
+        goto(`?${params.toString()}`);
     }
 
     // Reset filters when button pressed
-    function clearFilter(){
+    function clearFilter() {
+
         selectedCategory = "";
         selectedMinAmount = "";
         selectedMaxAmount = "";
         selectedStartDate = "";
         selectedEndDate = "";
-        loadTransactions();
+
+        goto("?");
     }
 
-    // Calculate aggregated TotalSpend
-    function calculateTotalSpend() {
-        let sum = 0;
-        for (let t of transactions) {
-            sum += t.amount;
-        }
-        totalSpend = sum;
-    }
+    function handleEdit(transaction) {
 
-    // Manage the category edit button
-    async function handleEdit(transactionId) {
+        if (editingTransactionId === transaction.id) {
+            // Save mode handled by form submit
+            return;
 
-        if (transactionId === editingTransactionId) {
-            await fetch(
-            `http://127.0.0.1:8000/transactions/${editingTransactionId}/category?category_id=${editingCategoryId}`,
-            { method: "PUT" }
-            );
-            editingTransactionId = null;
-            editingCategoryId = null;
-            loadTransactions();
-        }
+        } else {
 
-        else {
-            // enter edit mode
-            editingTransactionId = transactionId
-            // editingCategoryId = categoryId -> first add category_id in transaction table
+            editingTransactionId = transaction.id;
+            editingCategoryId = transaction.category_id;
         }
     }
 
@@ -236,14 +193,12 @@
                     <button
                         class="btn btn-primary me-2"
                         onclick={filterTransactions}
-                    >
-                        Apply Filter
+                    > Apply Filter
                     </button>
                     <button
                         class="btn btn-secondary"
                         onclick={clearFilter}
-                    >
-                        Clear
+                    > Clear
                     </button>
                 </div>
             </div>
@@ -276,32 +231,27 @@
                     <th 
                         onclick={() => handleSort("id")}
                         style="cursor: pointer;"
-                    >
-                        ID {getSortArrow("id")}
+                    > ID {getSortArrow("id")}
                     </th>
                     <th 
                         onclick={() => handleSort("description")}
                         style="cursor: pointer;"
-                    >
-                        Description {getSortArrow("description")}
+                    > Description {getSortArrow("description")}
                     </th>
                     <th 
                         onclick={() => handleSort("amount")}
                         style="cursor: pointer;"
-                    >
-                        Amount {getSortArrow("amount")}
+                    > Amount {getSortArrow("amount")}
                     </th>
                     <th 
                         onclick={() => handleSort("date")}
                         style="cursor: pointer;"
-                    >
-                        Date {getSortArrow("date")}
+                    > Date {getSortArrow("date")}
                     </th>
                     <th 
                         onclick={() => handleSort("category")}
                         style="cursor: pointer;"
-                    >
-                        Category {getSortArrow("category")}
+                    > Category {getSortArrow("category")}
                     </th>
                 </tr>
             </thead>
@@ -323,29 +273,47 @@
                             <td>{transaction.amount}</td>
                             <td>{transaction.date}</td>
                             <td>
-                                <!-- Edit mode active -->
                                 {#if transaction.id === editingTransactionId}
-                                    <select 
+                                    <select
                                         class="form-select form-select-sm"
                                         bind:value={editingCategoryId}
-                                        >
+                                    >
                                         {#each categories as category}
                                             <option value={category.id}>
                                                 {category.name}
                                             </option>
                                         {/each}
                                     </select>
-                                <!-- Edit mode not active -->
                                 {:else}
                                     {transaction.category}
                                 {/if}
                             </td>
-                            <td> 
-                                <button class="btn btn-sm btn-secondary"
-                                onclick={() => handleEdit(transaction.id)}
-                                // Display different label based on edit mode state
-                                >{transaction.id === editingTransactionId ? "Save" : "Edit"} 
-                                </button>
+                            <td>
+                                {#if transaction.id === editingTransactionId}
+                                    <form method="POST" action="?/updateCategory">
+                                        <input
+                                            type="hidden"
+                                            name="transactionId"
+                                            value={transaction.id}
+                                        />
+                                        <input
+                                            type="hidden"
+                                            name="categoryId"
+                                            value={editingCategoryId}
+                                        />
+                                        <button
+                                            class="btn btn-sm btn-secondary"
+                                            type="submit"
+                                        >Save
+                                        </button>
+                                    </form>
+                                {:else}
+                                    <button
+                                        class="btn btn-sm btn-secondary"
+                                        onclick={() => handleEdit(transaction)}
+                                    >Edit
+                                    </button>
+                                {/if}
                             </td>
                         </tr>
                     {/each}
