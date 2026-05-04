@@ -44,7 +44,7 @@ def get_categories():
 @app.get("/transactions", response_model=list[TransactionWithCategory]) 
 def get_transactions(
     # Filters
-    category: str | None = Query(default=None),
+    category_id: int | None = Query(default=None),
     min_amount: int | None = Query(default=None),
     max_amount: int | None = Query(default=None),
     start_date: date | None = Query(default=None),
@@ -67,8 +67,8 @@ def get_transactions(
         )
 
         # Filters
-        if category: 
-            statement = statement.where(Category.name == category)
+        if category_id is not None:
+            statement = statement.where(Category.id == category_id)
 
         if min_amount is not None:
             statement = statement.where(Transaction.amount >= min_amount)
@@ -87,7 +87,7 @@ def get_transactions(
         transactions = []
 
         # Return transactions using reponse model
-        for transaction, cat_name in results:
+        for transaction, category_name in results:
             transactions.append(
                 TransactionWithCategory(
                     id=transaction.id, # type: ignore
@@ -95,7 +95,7 @@ def get_transactions(
                     amount=transaction.amount,
                     date=transaction.date,
                     category_id=transaction.category_id,
-                    category_name=cat_name
+                    category_name=category_name
                 )
             )
 
