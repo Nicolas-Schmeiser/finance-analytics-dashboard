@@ -1,3 +1,5 @@
+import { redirect } from '@sveltejs/kit';
+
 // This function runs on the server before the page is rendered
 // allowing to pass the fetched data as props to the Svelte component.
 export async function load({ fetch, url }) {
@@ -35,7 +37,8 @@ export const actions = {
             { method: "PUT" }
         );
 
-        return { success: true };
+        // After updating the category, we redirect back to the transactions page (else, browser asks to re-send the form data on refresh)
+        throw redirect(303, '/transactions');
     }
 
 };
