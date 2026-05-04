@@ -2,15 +2,19 @@
 
 <script>
 
-    import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
     import Chart from "chart.js/auto";
 
-    // General Variables
-    let loading = $state(true);
-    let CategorySpendWithBudget = $state([])
-    let monthlyTotalSpend = $state([])
-    let totalSpend = $state(0);
-    let remainingBudget = $state(0);
+    // Accessing data passed from server-side load function as props
+    let {data} = $props();
+
+    // Data
+    let CategorySpendWithBudget = $derived(data.categorySpendWithBudget);
+    let monthlyTotalSpend = $derived(data.monthlyTotalSpend);
+    let totalSpend = $derived(CategorySpendWithBudget.reduce((sum, c) => sum + c.spent, 0));
+    let remainingBudget = $derived(CategorySpendWithBudget.reduce((sum, c) => sum + c.budget - c.spent, 0));
+    
+    // Charts
     let categoryChart;
     let trendChart;
 
@@ -18,90 +22,24 @@
     let selectedStartDate = $state("");
     let selectedEndDate = $state("");
 
-    // Loading filtered data for the summarized category spend vs budget bar visual
-    async function loadCategorySpendWithBudget(
-        startDate = "",
-        endDate = ""
-    ) {
-        loading = true;
-        let url = "http://127.0.0.1:8000/category_spend_with_budget";
-
-        // Enables multiple params separated by '&' in URL for filtering
-        const params = new URLSearchParams();
-        if (startDate !== "" && startDate !== null) {params.append("start_date",startDate);}
-        if (endDate !== "" && endDate !== null) {params.append("end_date",endDate);}
-        if (params.toString()) {url += `?${params.toString()}`;}
-
-        const response = await fetch(url);
-        CategorySpendWithBudget = await response.json();
-
-        calculateTotalSpend();
-        calculateRemainingBudget();
-        renderCategoryChart();
-
-        loading = false;
-    }
-
-    // Loading filtered data for the summarized monthly Time-Serie visual
-    async function loadMonthlyTotalSpend(
-        startDate = "",
-        endDate = ""
-    ) {
-        loading = true;
-        let url = "http://127.0.0.1:8000/monthly_total_spend";
-
-        // Enables multiple params separated by '&' in URL for filtering
-        const params = new URLSearchParams();
-        if (startDate !== "" && startDate !== null) {params.append("start_date",startDate);}
-        if (endDate !== "" && endDate !== null) {params.append("end_date",endDate);}
-        if (params.toString()) {url += `?${params.toString()}`;}
-
-        const response = await fetch(url);
-        monthlyTotalSpend = await response.json();
-
-        renderTotalSpendChart();
-
-        loading = false;
-    }
-
     // Apply filters when button pressed
     function applyFilters(){
-        loadCategorySpendWithBudget(
-            selectedStartDate,
-            selectedEndDate
-        );
-        loadMonthlyTotalSpend(
-            selectedStartDate,
-            selectedEndDate 
-        );
+
+        const params = new URLSearchParams();
+
+        if (selectedStartDate) {params.append("start_date", selectedStartDate);}
+        if (selectedEndDate) {params.append("end_date", selectedEndDate);}
+
+        goto(`?${params.toString()}`);
     }
 
     // Reset filters when button pressed
     function clearFilter(){
+
         selectedStartDate = "";
         selectedEndDate = "";
-        loadCategorySpendWithBudget();
-        loadMonthlyTotalSpend();
-    }
 
-    // Calculate aggregated TotalSpend
-    function calculateTotalSpend() {
-        let sum = 0;
-        for (let c of CategorySpendWithBudget) {
-            sum += c.spent;
-        }
-        totalSpend = sum;
-    }
-
-    // Calculate remaining budget
-    function calculateRemainingBudget() {
-        let sumSpent = 0;
-        let sumBudget = 0;
-        for (let c of CategorySpendWithBudget){
-            sumSpent += c.spent;
-            sumBudget += c.budget;
-        }
-        remainingBudget = sumBudget - sumSpent;
+        goto("?");
     }
 
     // Monthly Category Visual
@@ -140,10 +78,10 @@
         });
     }
 
-    // Define which function to run at page loading
-    onMount(() => {
-        loadCategorySpendWithBudget();
-        loadMonthlyTotalSpend();
+    // Render charts whenever data changes (initial load and after applying filters)
+    $effect(() => {
+        renderCategoryChart();
+        renderTotalSpendChart();
     });
 
 </script>
