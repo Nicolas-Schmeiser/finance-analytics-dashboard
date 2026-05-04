@@ -3,7 +3,8 @@
 <script>
     import { goto } from "$app/navigation";
 
-    let { data } = $props();
+    // Accessing data passed from server-side load function as props
+    let {data} = $props();
 
     // Data
     let transactions = $derived(data.transactions);
