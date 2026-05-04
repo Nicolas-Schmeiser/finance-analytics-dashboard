@@ -148,7 +148,7 @@
                     <label for="start-date" class="form-label">From:</label>
                     <input
                         id="start-date"
-                        type="date"
+                        type="month"
                         class="form-control"
                         bind:value={selectedStartDate}
                     />

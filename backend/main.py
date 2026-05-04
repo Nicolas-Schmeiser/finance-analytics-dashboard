@@ -146,42 +146,49 @@ def get_category_spend_with_budget(
     start_date: date | None = Query(default=None),
     end_date: date | None = Query(default=None),
 ):
+    
+    start_month = start_date.strftime("%Y-%m") if start_date else None
+    end_month = end_date.strftime("%Y-%m") if end_date else None
 
     with Session(engine) as session:
 
+        transaction_subq = (
+            select(
+                Category.id.label("category_id"), # type: ignore
+                func.sum(Transaction.amount).label("spent")
+            )
+            .join(Category, Category.id == Transaction.category_id) # type: ignore
+            .where(
+                Transaction.date >= start_date if start_date else True,
+                Transaction.date <= end_date if end_date else True
+            )
+            .group_by(Category.id) # type: ignore
+        ).subquery()
+
+        budget_subq = (
+            select(
+                Category.id.label("category_id"), # type: ignore
+                func.sum(Budget.amount).label("budget")
+            )
+            .join(Category, Category.id == Budget.category_id) # type: ignore
+            .where(
+                func.strftime("%Y-%m", Budget.date) >= start_month if start_month else True,
+                func.strftime("%Y-%m", Budget.date) <= end_month if end_month else True
+            )
+            .group_by(Category.id) # type: ignore
+        ).subquery()
+
         statement = (
             select(
-                Category.name.label("category"), # type: ignore
-                func.coalesce(func.sum(Transaction.amount),0).label("spent"),
-                func.coalesce(func.sum(Budget.amount),0).label("budget")
+                Category.name,
+                func.coalesce(transaction_subq.c.spent, 0),
+                func.coalesce(budget_subq.c.budget, 0)
             )
             .select_from(Category)
-            .outerjoin(
-                Transaction,
-                Transaction.category_id == Category.id # type: ignore
-            )
-            # Join budget on monthly level
-            .outerjoin(
-                Budget,
-                (Budget.category_id == Category.id) # type: ignore
-                & (func.strftime("%Y-%m", Budget.date) == func.strftime("%Y-%m", Transaction.date))
-            )
-            .group_by(Category.name)
+            .outerjoin(transaction_subq, Category.id == transaction_subq.c.category_id) # type: ignore
+            .outerjoin(budget_subq, Category.id == budget_subq.c.category_id) # type: ignore
             .order_by(Category.name)
         )
-
-        # Apply filter only if parameter is provided
-        if start_date is not None:
-            statement = statement.where(
-                (Transaction.date >= start_date)
-                & (Budget.date >= start_date)
-            )
-
-        if end_date is not None:
-            statement = statement.where(
-                (Transaction.date <= end_date)
-                & (Budget.date <= end_date)
-            )
 
         results = session.exec(statement).all()
 
