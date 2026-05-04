@@ -19,7 +19,7 @@
     let editingCategoryId = $state(null);
     
     // Filters
-    let selectedCategory = $state("");
+    let selectedCategoryId = $state("");
     let selectedMinAmount = $state("");
     let selectedMaxAmount = $state("");
     let selectedStartDate = $state("");
@@ -34,7 +34,7 @@
 
         const params = new URLSearchParams();
 
-        if (selectedCategory) params.append("category", selectedCategory);
+        if (selectedCategoryId) params.append("category_id", selectedCategoryId);
         if (selectedMinAmount) params.append("min_amount", selectedMinAmount);
         if (selectedMaxAmount)params.append("max_amount", selectedMaxAmount);
         if (selectedStartDate) params.append("start_date", selectedStartDate);
@@ -46,7 +46,7 @@
     // Reset filters when button pressed
     function clearFilter() {
 
-        selectedCategory = "";
+        selectedCategoryId = "";
         selectedMinAmount = "";
         selectedMaxAmount = "";
         selectedStartDate = "";
@@ -166,7 +166,7 @@
                     <label for="category-select" class="form-label">Category:</label>
                     <select
                         id="category-select"
-                        bind:value={selectedCategory}
+                        bind:value={selectedCategoryId}
                         class="form-select"
                     >
                         <option value="">All</option>
@@ -255,9 +255,9 @@
                     > Date {getSortArrow("date")}
                     </th>
                     <th 
-                        onclick={() => handleSort("category")}
+                        onclick={() => handleSort("category_name")}
                         style="cursor: pointer;"
-                    > Category {getSortArrow("category")}
+                    > Category {getSortArrow("category_name")}
                     </th>
                 </tr>
             </thead>
@@ -291,7 +291,7 @@
                                         {/each}
                                     </select>
                                 {:else}
-                                    {transaction.category}
+                                    {transaction.category_name}
                                 {/if}
                             </td>
                             <td>

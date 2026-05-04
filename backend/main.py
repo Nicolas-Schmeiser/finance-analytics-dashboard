@@ -66,45 +66,36 @@ def get_transactions(
             )
         )
 
-        # Apply filter only if parameter is provided
-        if category:
-            statement = statement.where(
-                Category.name == category
-            )
+        # Filters
+        if category: 
+            statement = statement.where(Category.name == category)
 
-        if min_amount is not None: # To ensure 0 would not be considered as FALSE
-            statement = statement.where(
-                Transaction.amount >= min_amount
-            )
+        if min_amount is not None:
+            statement = statement.where(Transaction.amount >= min_amount)
 
-        if max_amount is not None:
-            statement = statement.where(
-                Transaction.amount <= max_amount
-        )
+        if max_amount is not None: 
+            statement = statement.where(Transaction.amount <= max_amount)
             
         if start_date is not None:
-            statement = statement.where(
-                Transaction.date >= start_date
-            )
+            statement = statement.where(Transaction.date >= start_date)
 
         if end_date is not None:
-            statement = statement.where(
-                Transaction.date <= end_date
-            )
+            statement = statement.where(Transaction.date <= end_date)
 
         results = session.exec(statement).all()
 
         transactions = []
 
         # Return transactions using reponse model
-        for transaction, category_name in results:
+        for transaction, cat_name in results:
             transactions.append(
                 TransactionWithCategory(
                     id=transaction.id, # type: ignore
                     description=transaction.description,
                     amount=transaction.amount,
                     date=transaction.date,
-                    category=category_name
+                    category_id=transaction.category_id,
+                    category_name=cat_name
                 )
             )
 

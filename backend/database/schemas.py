@@ -20,7 +20,8 @@ class TransactionWithCategory(SQLModel):
     description: str
     amount: int
     date: date
-    category: str
+    category_id: int
+    category_name: str
 
 
 class CategorySpendWithBudget(SQLModel):
