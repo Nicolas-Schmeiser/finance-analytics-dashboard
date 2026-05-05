@@ -5,7 +5,13 @@ from fastapi import HTTPException
 from sqlmodel import Session, select
 from database.database import engine
 from database.models import Transaction, Category, Budget
-from database.schemas import TransactionWithCategory, CategorySpendWithBudget, MonthlyTotalSpend
+from database.schemas import (
+    TransactionWithCategory,
+    CategorySpendWithBudget,
+    MonthlyTotalSpend,
+    MonthlyTotalBudget,
+    TransactionCreate
+)
 from sqlalchemy import func
 
 from datetime import date
@@ -102,6 +108,31 @@ def get_transactions(
         return transactions
     
 
+# Create a new transaction
+@app.post("/transactions", response_model=Transaction)
+def create_transaction(transaction_data: TransactionCreate):
+    with Session(engine) as session:
+
+        category = session.get(
+            Category,
+            transaction_data.category_id
+        )
+
+        if not category:
+            raise HTTPException(
+                status_code=404,
+                detail="Category not found"
+            )
+
+        transaction = Transaction(**transaction_data.model_dump())
+
+        session.add(transaction)
+        session.commit()
+        session.refresh(transaction)
+
+        return transaction
+
+
 # Edit category from an existing transaction
 @app.put("/transactions/{transaction_id}/category")
 def update_transaction_category(
@@ -129,6 +160,25 @@ def update_transaction_category(
 
         return transaction
     
+
+# Delete an existing transaction
+@app.delete("/transactions/{transaction_id}")
+def delete_transaction(transaction_id: int):
+    with Session(engine) as session:
+
+        transaction = session.get(Transaction, transaction_id)
+
+        if not transaction:
+            raise HTTPException(
+                status_code=404,
+                detail="Transaction not found"
+            )
+
+        session.delete(transaction)
+        session.commit()
+
+        return {"success": True}
+
 
 # Filtered aggregated monthly sum of transaction amount and budget per category
 @app.get("/category_spend_with_budget", response_model=list[CategorySpendWithBudget]) 
@@ -260,6 +310,56 @@ def get_monthly_total_spend(
                 MonthlyTotalSpend(
                     year_month = year_month,
                     spent = spent
+                )
+            )
+
+        return output
+
+
+@app.get("/monthly_total_budget", response_model=list[MonthlyTotalBudget])
+def get_monthly_total_budget(
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
+):
+    start_month = start_date.strftime("%Y-%m") if start_date else None
+    end_month = end_date.strftime("%Y-%m") if end_date else None
+
+    with Session(engine) as session:
+
+        year_month = func.strftime(
+            "%Y-%m",
+            Budget.date
+        )
+
+        statement = (
+            select(
+                year_month.label("year_month"),
+                func.coalesce(func.sum(Budget.amount), 0).label("budget"),
+            )
+            .select_from(Budget)
+            .group_by(year_month)
+            .order_by(year_month)
+        )
+
+        if start_month is not None:
+            statement = statement.where(
+                func.strftime("%Y-%m", Budget.date) >= start_month
+            )
+
+        if end_month is not None:
+            statement = statement.where(
+                func.strftime("%Y-%m", Budget.date) <= end_month
+            )
+
+        results = session.exec(statement).all()
+
+        output = []
+
+        for year_month, budget in results:
+            output.append(
+                MonthlyTotalBudget(
+                    year_month=year_month,
+                    budget=budget
                 )
             )
 

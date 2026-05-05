@@ -5,7 +5,7 @@
     import { goto } from "$app/navigation";
 
     // Accessing data passed from server-side load function as props
-    let {data} = $props();
+    let {data, form} = $props();
 
     // Data
     let transactions = $derived(data.transactions);
@@ -166,6 +166,12 @@
     function nextPage() {
         if (currentPage < totalPages) {
             currentPage += 1;
+        }
+    }
+
+    function normalizeCurrentPage() {
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
         }
     }
 </script>
@@ -368,11 +374,38 @@
                                         </button>
                                     </form>
                                 {:else}
-                                    <button
-                                        class="btn btn-sm btn-secondary"
-                                        onclick={() => handleEdit(transaction)}
-                                    >Edit
-                                    </button>
+                                    <div class="d-flex gap-2">
+                                        <button
+                                            class="btn btn-sm btn-secondary"
+                                            onclick={() => handleEdit(transaction)}
+                                        >Edit
+                                        </button>
+                                        <form
+                                            method="POST"
+                                            action="?/deleteTransaction"
+                                            use:enhance={() => {
+                                                return async ({ result }) => {
+                                                    if (result.type === "success") {
+                                                        transactions = transactions.filter(
+                                                            (item) => item.id !== transaction.id
+                                                        );
+                                                        normalizeCurrentPage();
+                                                    }
+                                                };
+                                            }}
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="transactionId"
+                                                value={transaction.id}
+                                            />
+                                            <button
+                                                class="btn btn-sm btn-outline-danger"
+                                                type="submit"
+                                            >Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 {/if}
                             </td>
                         </tr>
@@ -411,4 +444,101 @@
             </div>
         </div>
     {/if}
+
+    <div class="card shadow-sm mt-2 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Add Transaction</h5>
+
+            {#if form?.error}
+                <div class="alert alert-danger py-2 mb-3" role="alert">
+                    {form.error}
+                </div>
+            {/if}
+
+            {#if form?.success}
+                <div class="alert alert-success py-2 mb-3" role="alert">
+                    {form.message}
+                </div>
+            {/if}
+
+            <form
+                method="POST"
+                action="?/addTransaction"
+                use:enhance={({ formElement }) => {
+                    return async ({ result }) => {
+                        if (result.type === "success") {
+                            const { transaction } = result.data;
+                            const selectedCategory = categories.find(
+                                (category) => String(category.id) === String(transaction.category_id)
+                            );
+
+                            transactions = [
+                                {
+                                    ...transaction,
+                                    category_name: selectedCategory?.name ?? "Unknown"
+                                },
+                                ...transactions
+                            ];
+
+                            formElement.reset();
+                            currentPage = 1;
+                        }
+                    };
+                }}
+            >
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label for="new-description" class="form-label">Description</label>
+                        <input
+                            id="new-description"
+                            name="description"
+                            type="text"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <label for="new-amount" class="form-label">Amount</label>
+                        <input
+                            id="new-amount"
+                            name="amount"
+                            type="number"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label for="new-date" class="form-label">Date</label>
+                        <input
+                            id="new-date"
+                            name="date"
+                            type="date"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label for="new-category" class="form-label">Category</label>
+                        <select
+                            id="new-category"
+                            name="categoryId"
+                            class="form-select"
+                            required
+                        >
+                            <option value="" disabled selected>Select category</option>
+                            {#each categories as category}
+                                <option value={category.id}>{category.name}</option>
+                            {/each}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        Add Transaction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

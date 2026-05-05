@@ -12,8 +12,13 @@ export async function load({ fetch, url }) {
         `http://127.0.0.1:8000/monthly_total_spend?${params}`
     );
 
+    const monthlyTotalBudgetRes = await fetch(
+        `http://127.0.0.1:8000/monthly_total_budget?${params}`
+    );
+
     return {
         categorySpendWithBudget: await CategorySpendWithBudgetRes.json(),
-        monthlyTotalSpend: await monthlyTotalSpendRes.json()
+        monthlyTotalSpend: await monthlyTotalSpendRes.json(),
+        monthlyTotalBudget: await monthlyTotalBudgetRes.json()
     };
 }

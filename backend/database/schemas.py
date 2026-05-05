@@ -34,3 +34,17 @@ class MonthlyTotalSpend(SQLModel):
 
     year_month: str
     spent: int
+
+
+class MonthlyTotalBudget(SQLModel):
+
+    year_month: str
+    budget: int
+
+
+class TransactionCreate(SQLModel):
+
+    description: str
+    amount: int
+    date: date
+    category_id: int

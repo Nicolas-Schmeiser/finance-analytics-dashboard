@@ -11,6 +11,7 @@
     // Data
     let CategorySpendWithBudget = $derived(data.categorySpendWithBudget);
     let monthlyTotalSpend = $derived(data.monthlyTotalSpend);
+    let monthlyTotalBudget = $derived(data.monthlyTotalBudget);
     let totalSpend = $derived(CategorySpendWithBudget.reduce((sum, c) => sum + c.spent, 0));
     let remainingBudget = $derived(CategorySpendWithBudget.reduce((sum, c) => sum + c.budget - c.spent, 0));
     
@@ -44,6 +45,8 @@
 
     // Monthly Category Visual
     function renderCategoryChart() {
+        const spentColor = "rgba(54, 162, 235, 1)";
+        const budgetColor = "rgba(255, 159, 64, 1)";
         const labels = CategorySpendWithBudget.map(row => row.category)
         const spent = CategorySpendWithBudget.map(row => row.spent)
         const budget = CategorySpendWithBudget.map(row => row.budget)
@@ -54,27 +57,73 @@
             data: {
                 labels: labels,
                 datasets: [
-                    {label: "Spent", data: spent},
-                    {label: "Budget",data: budget}
+                    {
+                        label: "Spent",
+                        data: spent,
+                        backgroundColor: "rgba(54, 162, 235, 0.6)",
+                        borderColor: spentColor,
+                        borderWidth: 1
+                    },
+                    {
+                        label: "Budget",
+                        data: budget,
+                        backgroundColor: "rgba(255, 159, 64, 0.6)",
+                        borderColor: budgetColor,
+                        borderWidth: 1
+                    }
                 ]
-            }
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "Spend vs Budget by Category"
+                    }
+                }
+            },
         })
     }
 
     // Monthly Total Spend Visual
     function renderTotalSpendChart(){
+        const spentColor = "rgba(54, 162, 235, 1)";
+        const budgetColor = "rgba(255, 159, 64, 1)";
         const ctx =document.getElementById("trendChart");
-        const labels = monthlyTotalSpend.map(row => row.year_month);
-        const totals = monthlyTotalSpend.map(row => row.spent);
+        const spentByMonth = new Map(monthlyTotalSpend.map(row => [row.year_month, row.spent]));
+        const budgetByMonth = new Map(monthlyTotalBudget.map(row => [row.year_month, row.budget]));
+        const labels = [...new Set([...spentByMonth.keys(), ...budgetByMonth.keys()])].sort();
+        const totals = labels.map((month) => spentByMonth.get(month) ?? 0);
+        const budgets = labels.map((month) => budgetByMonth.get(month) ?? 0);
         if (trendChart) {trendChart.destroy();}
         trendChart = new Chart(ctx, {
             type: "line",
             data: {
                 labels: labels,
                 datasets: [
-                    {label: "Total Spend", data: totals, tension: 0.3}
+                    {
+                        label: "Total Spend",
+                        data: totals,
+                        tension: 0.3,
+                        borderColor: spentColor,
+                        backgroundColor: "rgba(54, 162, 235, 0.2)"
+                    },
+                    {
+                        label: "Total Budget",
+                        data: budgets,
+                        tension: 0.3,
+                        borderColor: budgetColor,
+                        backgroundColor: "rgba(255, 159, 64, 0.2)"
+                    }
                 ]
-            }
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "Spend and Budget Over Time"
+                    }
+                }
+            },
         });
     }
 
