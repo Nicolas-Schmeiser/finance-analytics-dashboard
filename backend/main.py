@@ -149,12 +149,20 @@ def get_category_spend_with_budget(
                 func.sum(Transaction.amount).label("spent")
             )
             .join(Category, Category.id == Transaction.category_id) # type: ignore
-            .where(
-                Transaction.date >= start_date if start_date else True,
-                Transaction.date <= end_date if end_date else True
-            )
             .group_by(Category.id) # type: ignore
-        ).subquery()
+        )
+
+        if start_date is not None:
+            transaction_subq = transaction_subq.where(
+                Transaction.date >= start_date
+            )
+
+        if end_date is not None:
+            transaction_subq = transaction_subq.where(
+                Transaction.date <= end_date
+            )
+
+        transaction_subq = transaction_subq.subquery()
 
         budget_subq = (
             select(
@@ -162,12 +170,20 @@ def get_category_spend_with_budget(
                 func.sum(Budget.amount).label("budget")
             )
             .join(Category, Category.id == Budget.category_id) # type: ignore
-            .where(
-                func.strftime("%Y-%m", Budget.date) >= start_month if start_month else True,
-                func.strftime("%Y-%m", Budget.date) <= end_month if end_month else True
-            )
             .group_by(Category.id) # type: ignore
-        ).subquery()
+        )
+
+        if start_month is not None:
+            budget_subq = budget_subq.where(
+                func.strftime("%Y-%m", Budget.date) >= start_month
+            )
+
+        if end_month is not None:
+            budget_subq = budget_subq.where(
+                func.strftime("%Y-%m", Budget.date) <= end_month
+            )
+
+        budget_subq = budget_subq.subquery()
 
         statement = (
             select(
