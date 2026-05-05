@@ -415,6 +415,7 @@
         </table>
     </div>
 
+    <!-- Pagination Controls -->
     {#if transactions.length > 0}
         <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
             <small class="text-muted">
@@ -445,6 +446,10 @@
         </div>
     {/if}
 
+    <!--Separation line-->
+    <hr class="my-4">
+
+    <!--Add Transaction Form-->
     <div class="card shadow-sm mt-2 mb-4">
         <div class="card-body">
             <h5 class="card-title mb-3">Add Transaction</h5>
