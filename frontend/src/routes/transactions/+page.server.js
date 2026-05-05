@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 
 // This function runs on the server before the page is rendered
 // allowing to pass the fetched data as props to the Svelte component.
@@ -32,13 +32,18 @@ export const actions = {
         const transactionId = formData.get("transactionId");
         const categoryId = formData.get("categoryId");
 
-        await fetch(
+        const response = await fetch(
             `http://127.0.0.1:8000/transactions/${transactionId}/category?category_id=${categoryId}`,
             { method: "PUT" }
         );
 
-        // After updating the category, we redirect back to the transactions page (else, browser asks to re-send the form data on refresh)
-        throw redirect(303, '/transactions');
+        if (!response.ok) {
+            return fail(response.status, {
+                error: "Could not update category"
+            });
+        }
+
+        return { success: true };
     }
 
 };

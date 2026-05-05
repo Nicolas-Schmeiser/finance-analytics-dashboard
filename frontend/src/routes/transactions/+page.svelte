@@ -1,6 +1,7 @@
 <!-- /////////////////////// Logic (JavaScript) /////////////////////// -->
 
 <script>
+    import { enhance } from "$app/forms";
     import { goto } from "$app/navigation";
 
     // Accessing data passed from server-side load function as props
@@ -123,6 +124,27 @@
         return sortDirection === "asc"
             ? " ↑"
             : " ↓";
+    }
+
+    function handleCategorySaved(transactionId, categoryId) {
+        const selectedCategory = categories.find(
+            (category) => String(category.id) === String(categoryId)
+        );
+
+        if (!selectedCategory) return;
+
+        transactions = transactions.map((transaction) =>
+            transaction.id === transactionId
+                ? {
+                    ...transaction,
+                    category_id: selectedCategory.id,
+                    category_name: selectedCategory.name
+                }
+                : transaction
+        );
+
+        editingTransactionId = null;
+        editingCategoryId = null;
     }
 </script>
 
@@ -296,7 +318,17 @@
                             </td>
                             <td>
                                 {#if transaction.id === editingTransactionId}
-                                    <form method="POST" action="?/updateCategory">
+                                    <form
+                                        method="POST"
+                                        action="?/updateCategory"
+                                        use:enhance={() => {
+                                            return async ({ result }) => {
+                                                if (result.type === "success") {
+                                                    handleCategorySaved(transaction.id, editingCategoryId);
+                                                }
+                                            };
+                                        }}
+                                    >
                                         <input
                                             type="hidden"
                                             name="transactionId"
