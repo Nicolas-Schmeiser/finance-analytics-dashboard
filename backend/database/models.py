@@ -19,12 +19,12 @@ class Transaction(SQLModel, table=True):
     description: str
     amount: int
     date: date
-    category_id: int
+    category_id: int = Field(foreign_key="category.id")
 
 
 class Budget(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
-    category_id: int
+    category_id: int = Field(foreign_key="category.id")
     amount: int
     date: date
