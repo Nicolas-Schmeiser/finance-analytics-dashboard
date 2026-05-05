@@ -14,6 +14,8 @@
     
     // State
     let loading = $state(false);
+    let currentPage = $state(1);
+    const pageSize = 10;
 
     // Editing Category
     let editingTransactionId = $state(null);
@@ -30,6 +32,12 @@
     let sortColumn = $state(null);
     let sortDirection = $state("asc");
 
+    // Pagination
+    let totalPages = $derived(Math.max(1, Math.ceil(transactions.length / pageSize)));
+    let paginatedTransactions = $derived(
+        transactions.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+    );
+
     // Apply filters when button pressed
     function filterTransactions() {
 
@@ -41,6 +49,7 @@
         if (selectedStartDate) params.append("start_date", selectedStartDate);
         if (selectedEndDate) params.append("end_date", selectedEndDate);
 
+        currentPage = 1;
         goto(`?${params.toString()}`);
     }
 
@@ -52,6 +61,7 @@
         selectedMaxAmount = "";
         selectedStartDate = "";
         selectedEndDate = "";
+        currentPage = 1;
 
         goto("?");
     }
@@ -111,7 +121,7 @@
                 ? String(valueA).localeCompare(String(valueB))
                 : String(valueB).localeCompare(String(valueA));
         });
-
+        currentPage = 1;
     }
 
     // Sorting direction
@@ -145,6 +155,18 @@
 
         editingTransactionId = null;
         editingCategoryId = null;
+    }
+
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage -= 1;
+        }
+    }
+
+    function nextPage() {
+        if (currentPage < totalPages) {
+            currentPage += 1;
+        }
     }
 </script>
 
@@ -287,14 +309,14 @@
             <tbody>
                 {#if loading}
                     <tr>
-                        <td colspan="5">Loading data...</td>
+                        <td colspan="6">Loading data...</td>
                     </tr>
                 {:else if transactions.length === 0}
                     <tr>
-                        <td colspan="5">No transactions found</td>
+                        <td colspan="6">No transactions found</td>
                     </tr>
                 {:else}
-                    {#each transactions as transaction}
+                    {#each paginatedTransactions as transaction}
                         <tr>
                             <td>{transaction.id}</td>
                             <td>{transaction.description}</td>
@@ -359,4 +381,34 @@
             </tbody>
         </table>
     </div>
+
+    {#if transactions.length > 0}
+        <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+            <small class="text-muted">
+                Showing {(currentPage - 1) * pageSize + 1}
+                -
+                {Math.min(currentPage * pageSize, transactions.length)}
+                of {transactions.length}
+            </small>
+            <div class="btn-group" role="group" aria-label="Pagination controls">
+                <button
+                    class="btn btn-outline-secondary btn-sm"
+                    onclick={previousPage}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" disabled>
+                    Page {currentPage} / {totalPages}
+                </button>
+                <button
+                    class="btn btn-outline-secondary btn-sm"
+                    onclick={nextPage}
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </button>
+            </div>
+        </div>
+    {/if}
 </div>
