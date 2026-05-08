@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Query
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 
 from sqlmodel import Session, select
@@ -17,16 +16,6 @@ from sqlalchemy import func
 from datetime import date
     
 app = FastAPI()
-
-# Add CORS middleware otherwise the frontend won't be able to access the API response due to CORS policy
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 # Root route to confirm API is running when starting the server
 @app.get("/") 
