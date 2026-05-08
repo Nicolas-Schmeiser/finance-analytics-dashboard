@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi import HTTPException
 
 from sqlmodel import Session, select
+from database.database import create_db_and_tables
 from database.database import engine
 from database.models import Transaction, Category, Budget
 from database.schemas import (
@@ -22,6 +23,9 @@ app = FastAPI()
 def root():
     return {"message": "API is running"}
 
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 # Dynamic load of existing categories in filter
 @app.get("/categories", response_model=list[Category]) 

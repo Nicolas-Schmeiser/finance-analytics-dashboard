@@ -55,3 +55,6 @@ npm run dev
 ### Access
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8000
+
+## Seed Data
+Database tables are automatically initialized on first startup. Seed data can optionally be added executing seed.py.
