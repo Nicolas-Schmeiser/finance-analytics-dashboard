@@ -6,6 +6,7 @@ Each class represents one table in the database.
 
 from datetime import date # required for date fields
 from sqlmodel import SQLModel, Field
+from sqlalchemy import Column, ForeignKey
 
 class Category(SQLModel, table=True):
 
@@ -19,12 +20,32 @@ class Transaction(SQLModel, table=True):
     description: str
     amount: int
     date: date
-    category_id: int = Field(foreign_key="category.id")
+
+    category_id: int = Field(
+        sa_column=Column(
+            ForeignKey(
+                "category.id",
+                ondelete="RESTRICT",
+                onupdate="CASCADE"
+            ),
+            nullable=False
+        )
+    )
 
 
 class Budget(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
-    category_id: int = Field(foreign_key="category.id")
     amount: int
     date: date
+
+    category_id: int = Field(
+        sa_column=Column(
+            ForeignKey(
+                "category.id",
+                ondelete="CASCADE",
+                onupdate="CASCADE"
+            ),
+            nullable=False
+        )
+    )
