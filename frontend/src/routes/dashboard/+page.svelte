@@ -4,6 +4,7 @@
 
     import { goto } from "$app/navigation";
     import Chart from "chart.js/auto";
+    import '../../styles/global.css'
 
     // Accessing data passed from server-side load function as props
     let {data} = $props();
@@ -74,6 +75,9 @@
                 ]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
                 plugins: {
                     title: {
                         display: true,
@@ -117,6 +121,9 @@
                 ]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                
                 plugins: {
                     title: {
                         display: true,
@@ -219,13 +226,20 @@
     <hr class="my-4">
 
     <!--Visuals-->
-    <div class="row">
-        <div class="col-md-6">
-            <canvas id="categoryChart"></canvas>
+    <div class="row mb-4">
+
+        <div class="col-12 mb-4">
+            <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+            </div>
         </div>
-        <div class="col-md-6">
-            <canvas id="trendChart"></canvas>
+
+        <div class="col-12">
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
         </div>
+
     </div>
 
 </div>

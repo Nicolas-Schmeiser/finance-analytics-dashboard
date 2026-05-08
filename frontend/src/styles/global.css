@@ -21,6 +21,12 @@ h1, h2, h3, h4, h5 {
   font-size: 0.95rem;
 }
 
+.chart-container {
+    position: relative;
+    height: 35vh;
+    width: 100%;
+}
+
 footer {
   font-size: 0.9rem;
 }
