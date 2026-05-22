@@ -4,6 +4,7 @@
 
     import { goto } from "$app/navigation";
     import Chart from "chart.js/auto";
+    import { formatCurrencyWithSymbol, chartCurrencyTooltip, chartCurrencyYAxis } from "$lib/format";
     import '../../styles/global.css'
 
     // Accessing data passed from server-side load function as props
@@ -96,7 +97,11 @@
                     title: {
                         display: true,
                         text: "Spend vs Budget by Category"
-                    }
+                    },
+                    tooltip: chartCurrencyTooltip
+                },
+                scales: {
+                    y: chartCurrencyYAxis
                 }
             },
         })
@@ -129,7 +134,8 @@
                     },
                     legend: {
                         position: "bottom"
-                    }
+                    },
+                    tooltip: chartCurrencyTooltip
                 }
             },
         });
@@ -175,7 +181,11 @@
                     title: {
                         display: true,
                         text: "Spend and Budget Over Time"
-                    }
+                    },
+                    tooltip: chartCurrencyTooltip
+                },
+                scales: {
+                    y: chartCurrencyYAxis
                 }
             },
         });
@@ -248,7 +258,7 @@
                     Total Spend
                     </h6>
                     <h3 class="fw-bold">
-                    {totalSpend} €
+                    {formatCurrencyWithSymbol(totalSpend)}
                     </h3>
                 </div>
             </div>
@@ -262,7 +272,7 @@
                     Remaining Budget
                     </h6>
                     <h3 class="fw-bold">
-                    {remainingBudget} €
+                    {formatCurrencyWithSymbol(remainingBudget)}
                     </h3>
                 </div>
             </div>

@@ -3,6 +3,7 @@
 <script>
     import { enhance } from "$app/forms";
     import { goto } from "$app/navigation";
+    import { formatCurrency, formatCurrencyWithSymbol } from "$lib/format";
 
     // Accessing data passed from server-side load function as props
     let {data, form} = $props();
@@ -37,13 +38,6 @@
         filteredTransactions.reduce((sum, t) => sum + Number(t.amount), 0)
     );
 
-    function formatCurrency(value) {
-        return Number(value).toLocaleString("de-DE", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-    }
-
     // Sorting
     let sortColumn = $state(null);
     let sortDirection = $state("asc");
@@ -65,6 +59,7 @@
             transaction.id,
             transaction.description,
             transaction.amount,
+            formatCurrency(transaction.amount),
             transaction.date,
             transaction.category_name
         ].some((value) => String(value).toLowerCase().includes(normalizedQuery));
@@ -310,7 +305,7 @@
             Total Spend
             </h6>
             <h3 class="fw-bold">
-            {formatCurrency(totalSpend)} €
+            {formatCurrencyWithSymbol(totalSpend)}
             </h3>
         </div>
         </div>
@@ -382,7 +377,7 @@
                         <tr>
                             <td>{transaction.id}</td>
                             <td>{transaction.description}</td>
-                            <td>{formatCurrency(transaction.amount)} €</td>
+                            <td>{formatCurrencyWithSymbol(transaction.amount)}</td>
                             <td>{transaction.date}</td>
                             <td>
                                 {#if transaction.id === editingTransactionId}
