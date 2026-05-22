@@ -33,7 +33,16 @@
             transactionMatchesSearch(transaction, searchQuery)
         )
     );
-    let totalSpend = $derived(filteredTransactions.reduce((sum, t) => sum + t.amount, 0));
+    let totalSpend = $derived(
+        filteredTransactions.reduce((sum, t) => sum + Number(t.amount), 0)
+    );
+
+    function formatCurrency(value) {
+        return Number(value).toLocaleString("de-DE", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
 
     // Sorting
     let sortColumn = $state(null);
@@ -260,6 +269,8 @@
                     <input
                         id="min-amount"
                         type="number"
+                        step="0.01"
+                        min="0"
                         class="form-control"
                         bind:value={selectedMinAmount}
                     />
@@ -269,6 +280,8 @@
                     <input
                         id="max-amount"
                         type="number"
+                        step="0.01"
+                        min="0"
                         class="form-control"
                         bind:value={selectedMaxAmount}
                     />
@@ -297,7 +310,7 @@
             Total Spend
             </h6>
             <h3 class="fw-bold">
-            {totalSpend} €
+            {formatCurrency(totalSpend)} €
             </h3>
         </div>
         </div>
@@ -369,7 +382,7 @@
                         <tr>
                             <td>{transaction.id}</td>
                             <td>{transaction.description}</td>
-                            <td>{transaction.amount}</td>
+                            <td>{formatCurrency(transaction.amount)} €</td>
                             <td>{transaction.date}</td>
                             <td>
                                 {#if transaction.id === editingTransactionId}
@@ -551,6 +564,8 @@
                             id="new-amount"
                             name="amount"
                             type="number"
+                            step="0.01"
+                            min="0"
                             class="form-control"
                             required
                         />

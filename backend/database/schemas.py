@@ -18,7 +18,7 @@ class TransactionWithCategory(SQLModel):
 
     id: int
     description: str
-    amount: int
+    amount: float
     date: date
     category_id: int
     category_name: str
@@ -27,13 +27,13 @@ class TransactionWithCategory(SQLModel):
 class CategorySpendWithBudget(SQLModel):
 
     category: str
-    spent: int
+    spent: float
     budget: int
 
 class MonthlyTotalSpend(SQLModel):
 
     year_month: str
-    spent: int
+    spent: float
 
 
 class MonthlyTotalBudget(SQLModel):
@@ -45,6 +45,6 @@ class MonthlyTotalBudget(SQLModel):
 class TransactionCreate(SQLModel):
 
     description: str
-    amount: int
+    amount: float
     date: date
     category_id: int

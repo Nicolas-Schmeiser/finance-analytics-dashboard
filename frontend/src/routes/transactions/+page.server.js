@@ -51,11 +51,17 @@ export const actions = {
         const formData = await request.formData();
 
         const description = String(formData.get("description") ?? "").trim();
-        const amount = Number(formData.get("amount"));
+        const amount = parseFloat(String(formData.get("amount") ?? ""));
         const transactionDate = String(formData.get("date") ?? "");
         const categoryId = Number(formData.get("categoryId"));
 
-        if (!description || Number.isNaN(amount) || !transactionDate || Number.isNaN(categoryId)) {
+        if (
+            !description ||
+            Number.isNaN(amount) ||
+            amount < 0 ||
+            !transactionDate ||
+            Number.isNaN(categoryId)
+        ) {
             return fail(400, {
                 error: "Please provide all transaction fields."
             });

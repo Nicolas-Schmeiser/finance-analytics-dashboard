@@ -44,8 +44,8 @@ def get_categories():
 def get_transactions(
     # Filters
     category_id: int | None = Query(default=None),
-    min_amount: int | None = Query(default=None),
-    max_amount: int | None = Query(default=None),
+    min_amount: float | None = Query(default=None),
+    max_amount: float | None = Query(default=None),
     start_date: date | None = Query(default=None),
     end_date: date | None = Query(default=None),
 ):

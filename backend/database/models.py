@@ -6,7 +6,7 @@ Each class represents one table in the database.
 
 from datetime import date # required for date fields
 from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, Numeric
 
 class Category(SQLModel, table=True):
 
@@ -18,7 +18,7 @@ class Transaction(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     description: str
-    amount: int
+    amount: float = Field(sa_column=Column(Numeric(12, 2), nullable=False))
     date: date
 
     category_id: int = Field(
