@@ -10,12 +10,12 @@
     // Data
     let transactions = $derived(data.transactions);
     let categories = $derived(data.categories);
-    let totalSpend = $derived(transactions.reduce((sum, t) => sum + t.amount, 0));
-    
+
     // State
     let loading = $state(false);
     let currentPage = $state(1);
     const pageSize = 10;
+    let searchQuery = $state("");
 
     // Editing Category
     let editingTransactionId = $state(null);
@@ -28,15 +28,42 @@
     let selectedStartDate = $state("");
     let selectedEndDate = $state("");
 
+    let filteredTransactions = $derived(
+        transactions.filter((transaction) =>
+            transactionMatchesSearch(transaction, searchQuery)
+        )
+    );
+    let totalSpend = $derived(filteredTransactions.reduce((sum, t) => sum + t.amount, 0));
+
     // Sorting
     let sortColumn = $state(null);
     let sortDirection = $state("asc");
 
     // Pagination
-    let totalPages = $derived(Math.max(1, Math.ceil(transactions.length / pageSize)));
+    let totalPages = $derived(Math.max(1, Math.ceil(filteredTransactions.length / pageSize)));
     let paginatedTransactions = $derived(
-        transactions.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+        filteredTransactions.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     );
+
+    function transactionMatchesSearch(transaction, query) {
+        const normalizedQuery = query.trim().toLowerCase();
+
+        if (!normalizedQuery) {
+            return true;
+        }
+
+        return [
+            transaction.id,
+            transaction.description,
+            transaction.amount,
+            transaction.date,
+            transaction.category_name
+        ].some((value) => String(value).toLowerCase().includes(normalizedQuery));
+    }
+
+    function handleSearchInput() {
+        currentPage = 1;
+    }
 
     // Apply filters when button pressed
     function filterTransactions() {
@@ -61,6 +88,7 @@
         selectedMaxAmount = "";
         selectedStartDate = "";
         selectedEndDate = "";
+        searchQuery = "";
         currentPage = 1;
 
         goto("?");
@@ -279,6 +307,21 @@
     <!--Separation line-->
     <hr class="my-4">
 
+    <!--Global Search-->
+    <div class="row mb-3">
+        <div class="col-12 col-md-6 col-lg-4">
+            <label for="transaction-search" class="form-label">Search</label>
+            <input
+                id="transaction-search"
+                type="search"
+                class="form-control"
+                placeholder="Search by ID, description, amount, date, or category..."
+                bind:value={searchQuery}
+                oninput={handleSearchInput}
+            />
+        </div>
+    </div>
+
     <!--Transaction Table-->
     <div class="table-responsive">
         <table class="table table-striped table-hover mt-3">
@@ -317,7 +360,7 @@
                     <tr>
                         <td colspan="6">Loading data...</td>
                     </tr>
-                {:else if transactions.length === 0}
+                {:else if filteredTransactions.length === 0}
                     <tr>
                         <td colspan="6">No transactions found</td>
                     </tr>
@@ -416,13 +459,13 @@
     </div>
 
     <!-- Pagination Controls -->
-    {#if transactions.length > 0}
+    {#if filteredTransactions.length > 0}
         <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
             <small class="text-muted">
                 Showing {(currentPage - 1) * pageSize + 1}
                 -
-                {Math.min(currentPage * pageSize, transactions.length)}
-                of {transactions.length}
+                {Math.min(currentPage * pageSize, filteredTransactions.length)}
+                of {filteredTransactions.length}
             </small>
             <div class="btn-group" role="group" aria-label="Pagination controls">
                 <button
