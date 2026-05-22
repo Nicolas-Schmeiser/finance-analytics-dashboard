@@ -18,7 +18,21 @@
     
     // Charts
     let categoryChart;
+    let categoryPieChart;
     let trendChart;
+
+    const pieChartColors = [
+        "rgba(54, 162, 235, 0.8)",
+        "rgba(255, 99, 132, 0.8)",
+        "rgba(255, 206, 86, 0.8)",
+        "rgba(75, 192, 192, 0.8)",
+        "rgba(153, 102, 255, 0.8)",
+        "rgba(255, 159, 64, 0.8)",
+        "rgba(199, 199, 199, 0.8)",
+        "rgba(83, 102, 255, 0.8)",
+        "rgba(255, 99, 255, 0.8)",
+        "rgba(99, 255, 132, 0.8)",
+    ];
 
     // Filters
     let selectedStartDate = $state("");
@@ -59,7 +73,7 @@
                 labels: labels,
                 datasets: [
                     {
-                        label: "Spent",
+                        label: "Spend",
                         data: spent,
                         backgroundColor: "rgba(54, 162, 235, 0.6)",
                         borderColor: spentColor,
@@ -86,6 +100,39 @@
                 }
             },
         })
+    }
+
+    function renderCategoryPieChart() {
+        const labels = CategorySpendWithBudget.map(row => row.category);
+        const spent = CategorySpendWithBudget.map(row => row.spent);
+        const ctx = document.getElementById("categoryPieChart");
+        if (categoryPieChart) {categoryPieChart.destroy();}
+        categoryPieChart = new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Spend",
+                        data: spent,
+                        backgroundColor: labels.map((_, i) => pieChartColors[i % pieChartColors.length]),
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "Spend by Category"
+                    },
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            },
+        });
     }
 
     // Monthly Total Spend Visual
@@ -137,6 +184,7 @@
     // Render charts whenever data changes (initial load and after applying filters)
     $effect(() => {
         renderCategoryChart();
+        renderCategoryPieChart();
         renderTotalSpendChart();
     });
 
@@ -228,9 +276,15 @@
     <!--Visuals-->
     <div class="row mb-4">
 
-        <div class="col-12 mb-4">
+        <div class="col-12 col-md-9 mb-4 mb-md-0">
             <div class="chart-container">
                 <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-3 mb-4">
+            <div class="chart-container">
+                <canvas id="categoryPieChart"></canvas>
             </div>
         </div>
 
