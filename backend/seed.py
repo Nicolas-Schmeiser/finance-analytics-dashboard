@@ -1,46 +1,20 @@
 """
 Seed script.
-
-Creates database tables and inserts initial sample data.
-This ensures the application starts with usable data.
+Insert sample data in database for user app exploration or testing.
 """
 from datetime import date
 
 from sqlmodel import Session
 
-from database.database import engine, create_db_and_tables
+from database.database import engine
 from database.models import Category, Transaction, Budget
 
 
 def seed_data():
-    """
-    Initialize database and insert sample records.
-    Safe to run once when setting up the system.
-    """
-
-    # Create tables
-    create_db_and_tables()
 
     with Session(engine) as session:
 
-        # Insert categories
-        categories = [
-            Category(name="Rent"), #1
-            Category(name="Groceries"), #2
-            Category(name="Transport"), #3
-            Category(name="Utilities"), #4
-            Category(name="Insurance"), #5
-            Category(name="Leisure"), #6
-            Category(name="Dog"), #7
-            Category(name="Tennis"), #8
-            Category(name="Misc"), #9
-            Category(name="Investment") #10
-        ]
-
-        session.add_all(categories)
-        session.commit()
-
-        # Insert transactions
+    # Insert transactions
         transactions = [
 
             # ---------- OCTOBER 2025 ----------
