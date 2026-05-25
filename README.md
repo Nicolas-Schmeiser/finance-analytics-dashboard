@@ -57,5 +57,5 @@ Frontend:
 - Backend API: http://localhost:8000/docs
 
 ## Seed Data
-Database tables are automatically initialized on first startup. 
+Database tables are automatically initialized on first startup, and categories populated.
 Seed data can optionally be added executing seed.py.
