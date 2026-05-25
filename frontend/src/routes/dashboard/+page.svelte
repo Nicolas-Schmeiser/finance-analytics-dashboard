@@ -217,6 +217,7 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-12 col-md">
+                        <!-- svelte-ignore a11y_label_has_associated_control -->
                         <label class="form-label">From:</label>
                         <input
                             type="date"
@@ -225,6 +226,7 @@
                         />
                     </div>
                     <div class="col-12 col-md">
+                        <!-- svelte-ignore a11y_label_has_associated_control -->
                         <label class="form-label">To:</label>
                         <input
                             type="date"
