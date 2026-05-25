@@ -45,16 +45,17 @@ Full-stack finance analytics dashboard for managing and analyzing financial tran
 
 ### Installing dependencies & running application:
 Backend:
-uv sync
-uv run uvicorn main:app --reload
+1. uv sync
+2. uv run uvicorn main:app --reload
 
 Frontend:
-npm install
-npm run dev
+1. npm install
+2. npm run dev
 
 ### Access
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
+- Frontend: http://localhost:5173/transactions
+- Backend API: http://localhost:8000/docs
 
 ## Seed Data
-Database tables are automatically initialized on first startup. Seed data can optionally be added executing seed.py.
+Database tables are automatically initialized on first startup. 
+Seed data can optionally be added executing seed.py.
